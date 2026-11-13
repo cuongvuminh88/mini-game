@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tổng quan — Đập Chuột</title>
+<link rel="stylesheet" href="../design/tokens.css">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<nav class="nav" aria-label="Tài liệu">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">Đập Chuột</a>
+    <div class="nav-links">
+      <a href="index.html">Mục lục</a>
+      <a href="01-tong-quan.html" aria-current="page">Tổng quan</a>
+      <a href="02-chuc-nang.html">Chức năng</a>
+      <a href="03-man-hinh.html">Màn hình</a>
+      <a href="04-quy-tac-du-lieu.html">Quy tắc &amp; dữ liệu</a>
+      <a href="05-ke-hoach-test.html">Kế hoạch test</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero container">
+  <p class="eyebrow">01 · Tổng quan</p>
+  <h1>Một trò chơi, ba mươi giây.</h1>
+  <p class="lead">Đập Chuột là game phản xạ một người chơi, chạy ngay khi mở file, không cần cài đặt, không cần máy chủ.</p>
+</header>
+
+<section class="section alt">
+  <div class="container">
+    <h2>Mục tiêu sản phẩm</h2>
+    <ul>
+      <li>Người chơi hiểu luật trong vài giây và chơi được ngay bằng chuột hoặc ngón tay.</li>
+      <li>Mỗi lượt ngắn (30 giây), khuyến khích chơi lại để phá kỷ lục.</li>
+      <li>Code gọn, dùng HTML, CSS, JavaScript thuần; thông số đặt tập trung để dễ chỉnh.</li>
+    </ul>
+
+    <h3>Người chơi</h3>
+    <p>Bất kỳ ai có trình duyệt hiện đại, trên máy tính hoặc điện thoại. Không có tài khoản, không thu thập dữ liệu cá nhân. Thứ duy nhất được lưu là kỷ lục, nằm trong trình duyệt của chính người chơi.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Phạm vi</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Hạng mục</th><th>Trong phạm vi</th></tr></thead>
+      <tbody>
+        <tr><td>Nền tảng</td><td>Chrome, Safari, Firefox, Edge bản mới nhất; máy tính và điện thoại (Safari iOS, Chrome Android).</td></tr>
+        <tr><td>Kỹ thuật</td><td>HTML, CSS, JavaScript thuần. Không bắt buộc thư viện ngoài. Mở trực tiếp <code>index.html</code> (giao thức <code>file://</code>) là chơi được.</td></tr>
+        <tr><td>Người chơi</td><td>Một người, không đăng nhập, không máy chủ.</td></tr>
+        <tr><td>Hình ảnh</td><td>Chuột và hang vẽ bằng SVG nội tuyến + CSS, không dùng file ảnh. <span class="tag new">Bổ sung</span></td></tr>
+        <tr><td>Âm thanh</td><td>Không có (có thể bổ sung ở phiên bản sau).</td></tr>
+        <tr><td>Lưu trữ</td><td>Chỉ kỷ lục, lưu bằng <code>localStorage</code>.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="container">
+    <h2>Quyết định sau phỏng vấn</h2>
+    <p>Năm điểm YEU-CAU.md chưa nói rõ, đã được chốt như sau và áp dụng cho toàn bộ tài liệu.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Câu hỏi</th><th>Quyết định</th><th>Chi tiết tại</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QĐ-01</td><td>Vẽ chuột và hang bằng gì?</td><td>SVG nội tuyến + CSS, dùng màu theo token. Hiển thị giống nhau trên mọi máy, không cần file ảnh.</td><td><a href="03-man-hinh.html#hinh-ve">Màn hình</a></td></tr>
+        <tr><td class="id">QĐ-02</td><td>Bấm lúc chuột đang thụt xuống vì hết giờ hiện có tính không?</td><td><strong>Không tính.</strong> Chỉ tính khi chuột ở trạng thái <em>Đang hiện</em>. Khi đã bắt đầu thụt, ô coi như ô trống.</td><td><a href="04-quy-tac-du-lieu.html#may-trang-thai">Quy tắc</a></td></tr>
+        <tr><td class="id">QĐ-03</td><td>Rời tab hoặc khóa màn hình giữa lượt?</td><td><strong>Đồng hồ vẫn chạy theo giờ thật.</strong> Quay lại mà đã quá 30 giây thì vào ngay màn hình Kết thúc.</td><td><a href="04-quy-tac-du-lieu.html#bien">Quy tắc</a></td></tr>
+        <tr><td class="id">QĐ-04</td><td>Màn hình Kết thúc có thêm thống kê?</td><td>Thêm dòng <strong>“Trúng X / Y con chuột”</strong>. Chỉ trong lượt, không lưu.</td><td><a href="03-man-hinh.html#mh-03">Màn hình</a></td></tr>
+        <tr><td class="id">QĐ-05</td><td>Hỗ trợ bàn phím, trợ năng?</td><td><strong>Mức cơ bản:</strong> nút dùng được bằng Enter/Space, có vòng focus, tôn trọng cài đặt “giảm chuyển động”. Không chơi bằng phím.</td><td><a href="03-man-hinh.html#tro-nang">Màn hình</a></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Ngoài phạm vi phiên bản này</h2>
+    <ul>
+      <li>Âm thanh, nhạc nền.</li>
+      <li>Nhiều cấp độ khó, chuột tăng tốc theo thời gian.</li>
+      <li>Chuột “bom” trừ điểm hoặc chuột vàng nhiều điểm.</li>
+      <li>Bảng xếp hạng trực tuyến, đăng nhập.</li>
+      <li>Tạm dừng giữa lượt (kể cả tự tạm dừng khi rời tab — xem QĐ-03).</li>
+      <li>Chơi bằng bàn phím (phím 1–9) — xem QĐ-05.</li>
+      <li>Lưu lịch sử các lượt chơi hoặc thống kê qua nhiều lượt.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="container">
+    <h2>Sản phẩm bàn giao</h2>
+    <ul>
+      <li><code>index.html</code> ở thư mục gốc game, mở trực tiếp là chơi được.</li>
+      <li>CSS và JavaScript có thể tách file riêng, nhưng chỉ dùng đường dẫn tương đối và không dùng <code>type="module"</code> (module bị chặn khi mở bằng <code>file://</code>).</li>
+      <li>Một đối tượng cấu hình duy nhất chứa mọi thông số (xem <a href="04-quy-tac-du-lieu.html#cau-hinh">Quy tắc &amp; dữ liệu</a>).</li>
+    </ul>
+  </div>
+</section>
+
+<div class="container pager">
+  <a href="index.html">‹ Mục lục</a>
+  <a href="02-chuc-nang.html">Chức năng ›</a>
+</div>
+<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 13/11/2026</div></footer>
+</body>
+</html>

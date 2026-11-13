@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quy tắc &amp; dữ liệu — Đập Chuột</title>
+<link rel="stylesheet" href="../design/tokens.css">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<nav class="nav" aria-label="Tài liệu">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">Đập Chuột</a>
+    <div class="nav-links">
+      <a href="index.html">Mục lục</a>
+      <a href="01-tong-quan.html">Tổng quan</a>
+      <a href="02-chuc-nang.html">Chức năng</a>
+      <a href="03-man-hinh.html">Màn hình</a>
+      <a href="04-quy-tac-du-lieu.html" aria-current="page">Quy tắc &amp; dữ liệu</a>
+      <a href="05-ke-hoach-test.html">Kế hoạch test</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero container">
+  <p class="eyebrow">04 · Quy tắc &amp; dữ liệu</p>
+  <h1>Luật chạy bên dưới.</h1>
+  <p class="lead">Thông số, trạng thái, dữ liệu và các trường hợp biên — đủ chi tiết để viết code mà không phải đoán.</p>
+</header>
+
+<section class="section alt" id="cau-hinh">
+  <div class="container">
+    <h2>Thông số cấu hình</h2>
+    <p>Mọi thông số nằm trong <strong>một đối tượng duy nhất</strong> ở đầu file JavaScript, đóng băng bằng <code>Object.freeze</code>. Không có “số ma thuật” nào khác rải trong code.</p>
+<pre>const CONFIG = Object.freeze({
+  GRID_ROWS: 3,
+  GRID_COLS: 3,
+  ROUND_MS: 30000,          // thời gian một lượt
+  MOLE_UP_MIN_MS: 600,      // chuột hiện ngắn nhất
+  MOLE_UP_MAX_MS: 1200,     // chuột hiện lâu nhất
+  GAP_MIN_MS: 200,          // nghỉ ngắn nhất giữa hai con
+  GAP_MAX_MS: 500,          // nghỉ lâu nhất giữa hai con
+  MAX_MOLES: 1,             // số chuột tối đa cùng lúc
+  POINTS_PER_HIT: 1,
+  WARNING_AT_S: 5,          // đổi màu đồng hồ khi còn ≤ 5 giây
+  ANIM_MS: 150,             // thò lên / thụt xuống
+  HIT_SHOW_MS: 150,         // giữ hình “bị đập” trước khi thụt
+  REPLAY_LOCK_MS: 500,      // khóa nút Chơi lại sau khi kết thúc
+  STORAGE_KEY: "dap-chuot.highScore"
+});</pre>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Quy tắc về thông số</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QT-01</td><td>Số ngẫu nhiên trong khoảng [min, max] lấy đều: <code>min + Math.random() * (max - min)</code>.</td></tr>
+        <tr><td class="id">QT-02</td><td>Thời gian hiện (<code>MOLE_UP_*</code>) <strong>đã bao gồm</strong> hiệu ứng thò lên. Hiệu ứng thụt xuống nằm <strong>ngoài</strong> thời gian hiện và được tính vào khoảng nghỉ.</td></tr>
+        <tr><td class="id">QT-03</td><td>Đổi <code>GRID_ROWS</code>/<code>GRID_COLS</code> thì lưới tự vẽ lại đúng số ô; không cần sửa chỗ khác.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section" id="may-trang-thai">
+  <div class="container">
+    <h2>Máy trạng thái</h2>
+    <h3>Trạng thái game</h3>
+    <div class="flow">
+      <span class="state">START</span><span class="arrow">→ startRound() →</span>
+      <span class="state">PLAYING</span><span class="arrow">→ hết giờ →</span>
+      <span class="state">END</span><span class="arrow">→ startRound() →</span>
+      <span class="state">PLAYING</span>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Quy tắc</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QT-10</td><td>Chỉ có ba giá trị: <code>START</code>, <code>PLAYING</code>, <code>END</code>. Màn hình hiển thị suy ra trực tiếp từ giá trị này.</td></tr>
+        <tr><td class="id">QT-11</td><td><code>startRound()</code> chỉ chạy được từ <code>START</code> hoặc <code>END</code>; gọi khi đang <code>PLAYING</code> thì bỏ qua (chống bấm đúp nút).</td></tr>
+        <tr><td class="id">QT-12</td><td><code>startRound()</code> luôn <strong>hủy mọi hẹn giờ cũ</strong> trước khi tạo hẹn giờ mới, rồi tăng <code>roundId</code>. Mọi callback hẹn giờ kiểm tra <code>roundId</code> của mình còn khớp không; không khớp thì thoát. Nhờ đó không bao giờ có hai đồng hồ hay hai luồng sinh chuột chạy song song.</td></tr>
+        <tr><td class="id">QT-13</td><td>Khi vào <code>END</code>: hủy hẹn giờ sinh chuột và hẹn giờ hiện, đặt mọi ô về Trống, tính kỷ lục, rồi mới hiện màn hình Kết thúc.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Trạng thái một con chuột</h3>
+    <div class="flow">
+      <span class="state">HIDDEN</span><span class="arrow">→ hết nghỉ →</span>
+      <span class="state">UP</span><span class="arrow">→ bị đập →</span>
+      <span class="state">HIT</span><span class="arrow">→</span>
+      <span class="state">HIDDEN</span>
+    </div>
+    <div class="flow">
+      <span class="state">UP</span><span class="arrow">→ hết giờ hiện →</span>
+      <span class="state">LEAVING</span><span class="arrow">→</span>
+      <span class="state">HIDDEN</span>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Quy tắc</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QT-20</td><td>Chỉ trạng thái <code>UP</code> nhận điểm. <code>HIT</code> và <code>LEAVING</code> coi như ô trống (QĐ-02).</td></tr>
+        <tr><td class="id">QT-21</td><td>Cú đập hợp lệ chuyển ngay <code>UP → HIT</code> trong cùng hàm xử lý, trước khi cộng điểm. Cú bấm thứ hai vào cùng con (dù chỉ cách vài ms) thấy trạng thái <code>HIT</code> nên không được cộng.</td></tr>
+        <tr><td class="id">QT-22</td><td>Mỗi con chuột có <code>moleId</code> tăng dần. Hẹn giờ “hết giờ hiện” mang theo <code>moleId</code>; khi chạy mà chuột hiện tại có id khác hoặc không còn <code>UP</code> thì không làm gì.</td></tr>
+        <tr><td class="id">QT-23</td><td>Khoảng nghỉ đến con kế tiếp bắt đầu đếm từ lúc chuột rời trạng thái <code>UP</code> (bị đập hoặc hết giờ hiện).</td></tr>
+        <tr><td class="id">QT-24</td><td>Chọn ô mới: lấy đều ngẫu nhiên trong các ô khác <code>lastHole</code>. Con đầu tiên của lượt (<code>lastHole = null</code>) chọn trong cả 9 ô.</td></tr>
+        <tr><td class="id">QT-25</td><td>Không sinh chuột mới nếu thời gian còn lại của lượt ≤ 0. Chuột vẫn được sinh nếu còn thời gian dù ít hơn thời gian hiện; nó sẽ biến mất khi hết lượt.</td></tr>
+        <tr><td class="id">QT-26</td><td><code>spawned</code> (Y) tăng 1 mỗi khi một con chuyển sang <code>UP</code>.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section alt" id="dong-ho">
+  <div class="container">
+    <h2>Đồng hồ</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Quy tắc</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QT-30</td><td>Lưu <code>endAt = performance.now() + ROUND_MS</code> lúc bắt đầu. Thời gian còn lại luôn tính bằng <code>endAt − performance.now()</code>, <strong>không</strong> đếm bằng cách trừ dần 1 mỗi lần hẹn giờ chạy (tránh trôi giờ).</td></tr>
+        <tr><td class="id">QT-31</td><td>Số hiển thị = <code>Math.ceil(còn lại / 1000)</code>, kẹp trong [0, 30]. Cập nhật bằng vòng <code>requestAnimationFrame</code> hoặc hẹn giờ ~100–250ms; chỉ ghi vào DOM khi số thay đổi.</td></tr>
+        <tr><td class="id">QT-32</td><td>Hết lượt khi còn lại ≤ 0. Kiểm tra cả trong vòng cập nhật đồng hồ và ngay đầu hàm xử lý cú bấm — nên cú bấm đến sau thời điểm <code>endAt</code> không bao giờ được tính, kể cả khi màn hình chưa kịp chuyển.</td></tr>
+        <tr><td class="id">QT-33</td><td>Cảnh báo khi số hiển thị ≤ <code>WARNING_AT_S</code> (tức từ lúc hiện “5”).</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section" id="du-lieu">
+  <div class="container">
+    <h2>Dữ liệu</h2>
+    <h3>Dữ liệu một lượt (chỉ trong bộ nhớ)</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Trường</th><th>Kiểu</th><th>Giá trị đầu lượt</th><th>Ý nghĩa</th></tr></thead>
+      <tbody>
+        <tr><td><code>phase</code></td><td>"START" | "PLAYING" | "END"</td><td>"PLAYING"</td><td>Trạng thái game</td></tr>
+        <tr><td><code>roundId</code></td><td>số nguyên</td><td>+1 so với lượt trước</td><td>Vô hiệu hẹn giờ của lượt cũ</td></tr>
+        <tr><td><code>score</code></td><td>số nguyên ≥ 0</td><td>0</td><td>Điểm = số lần trúng (X)</td></tr>
+        <tr><td><code>spawned</code></td><td>số nguyên ≥ 0</td><td>0</td><td>Số chuột đã xuất hiện (Y)</td></tr>
+        <tr><td><code>endAt</code></td><td>số (ms)</td><td>now + 30000</td><td>Mốc hết lượt</td></tr>
+        <tr><td><code>mole</code></td><td>{ id, hole, state } | null</td><td>null</td><td>Con chuột hiện tại</td></tr>
+        <tr><td><code>lastHole</code></td><td>0–8 | null</td><td>null</td><td>Ô của con ngay trước</td></tr>
+        <tr><td><code>isNewRecord</code></td><td>boolean</td><td>false</td><td>Dùng ở màn hình Kết thúc</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Kỷ lục (lưu lâu dài)</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Quy tắc</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QT-40</td><td>Lưu trong <code>localStorage</code>, khóa <code>dap-chuot.highScore</code>, giá trị là chuỗi số nguyên không âm, ví dụ <code>"27"</code>.</td></tr>
+        <tr><td class="id">QT-41</td><td>Đọc một lần khi tải trang. Giá trị thiếu, không phải số nguyên, âm, hoặc <code>NaN</code> → coi là 0.</td></tr>
+        <tr><td class="id">QT-42</td><td>Mọi lần đọc/ghi bọc trong <code>try/catch</code>. Lỗi (chế độ riêng tư, bộ nhớ đầy, bị chặn) → giữ kỷ lục trong bộ nhớ của phiên, không báo lỗi, không ghi Console lỗi đỏ.</td></tr>
+        <tr><td class="id">QT-43</td><td>Cuối lượt: nếu <code>score &gt; highScore</code> (lớn hơn hẳn, không tính bằng) thì cập nhật, ghi bộ nhớ, <code>isNewRecord = true</code>. Lượt 0 điểm khi kỷ lục là 0 không phải kỷ lục mới.</td></tr>
+        <tr><td class="id">QT-44</td><td>Thống kê X / Y không được lưu.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section alt" id="bien">
+  <div class="container">
+    <h2>Trường hợp biên</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Tình huống</th><th>Cách xử lý</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QT-50</td><td>Rời tab / khóa màn hình giữa lượt <span class="tag new">QĐ-03</span></td><td>Đồng hồ vẫn chạy theo giờ thật. Trình duyệt có thể làm chậm hẹn giờ khi tab ẩn; vì vậy lắng nghe <code>visibilitychange</code> và khi trang hiện lại thì kiểm tra ngay: nếu đã quá <code>endAt</code> → kết thúc lượt; nếu chưa → cập nhật đồng hồ, chuột đang hiện mà đã quá giờ hiện thì cho thụt.</td></tr>
+        <tr><td class="id">QT-51</td><td>Bấm đúng lúc chuột hết giờ hiện</td><td>Thứ tự sự kiện quyết định: hẹn giờ “hết giờ hiện” chạy trước thì chuột đã <code>LEAVING</code> → không tính; cú bấm đến trước thì tính. Không có vùng ân hạn.</td></tr>
+        <tr><td class="id">QT-52</td><td>Bấm đa điểm (hai ngón chạm hai ô cùng lúc)</td><td>Xử lý từng cú chạm độc lập; tối đa một cú trúng vì chỉ có một chuột.</td></tr>
+        <tr><td class="id">QT-53</td><td>Bấm đúp “Bắt đầu”/“Chơi lại”</td><td>QT-11 chặn lần gọi thứ hai; thêm khóa 500ms cho “Chơi lại” (REPLAY_LOCK_MS).</td></tr>
+        <tr><td class="id">QT-54</td><td>Chạm rồi kéo ra ngoài ô</td><td>Tính theo <code>pointerdown</code>, nên vẫn là cú bấm vào ô ban đầu.</td></tr>
+        <tr><td class="id">QT-55</td><td>Cùng một sự kiện chạm sinh cả <code>touchstart</code> và <code>mousedown</code></td><td>Chỉ dùng Pointer Events cho lưới, không gắn thêm <code>click</code>/<code>touchstart</code> → không bị tính hai lần.</td></tr>
+        <tr><td class="id">QT-56</td><td>Mở bằng <code>file://</code></td><td>Không dùng ES module, <code>fetch</code> hay tài nguyên ngoài; mọi SVG nằm trong HTML.</td></tr>
+        <tr><td class="id">QT-57</td><td>Mở game ở hai tab cùng lúc</td><td>Mỗi tab chạy độc lập; kỷ lục ghi sau cùng thắng nếu lớn hơn giá trị tab đó đọc lúc tải. Chấp nhận được ở phiên bản này.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<div class="container pager">
+  <a href="03-man-hinh.html">‹ Màn hình</a>
+  <a href="05-ke-hoach-test.html">Kế hoạch test ›</a>
+</div>
+<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 13/11/2026</div></footer>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Màn hình — Đập Chuột</title>
+<link rel="stylesheet" href="../design/tokens.css">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<!-- Hình mẫu SVG dùng chung cho các mô phỏng bên dưới -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-hole" viewBox="0 0 100 100">
+      <ellipse class="svg-rim" cx="50" cy="78" rx="42" ry="14"/>
+      <ellipse class="svg-hole" cx="50" cy="78" rx="34" ry="9"/>
+    </symbol>
+    <symbol id="i-mole" viewBox="0 0 100 100">
+      <ellipse class="svg-rim" cx="50" cy="78" rx="42" ry="14"/>
+      <ellipse class="svg-hole" cx="50" cy="78" rx="34" ry="9"/>
+      <circle class="svg-ear" cx="30" cy="26" r="9"/>
+      <circle class="svg-ear" cx="70" cy="26" r="9"/>
+      <path class="svg-body" d="M24 78 V48 a26 26 0 0 1 52 0 V78 Z"/>
+      <ellipse class="svg-face" cx="50" cy="58" rx="15" ry="11"/>
+      <circle class="svg-eye" cx="41" cy="42" r="3.5"/>
+      <circle class="svg-eye" cx="59" cy="42" r="3.5"/>
+      <circle class="svg-eye" cx="50" cy="53" r="4"/>
+    </symbol>
+    <symbol id="i-mole-hit" viewBox="0 0 100 100">
+      <ellipse class="svg-rim" cx="50" cy="78" rx="42" ry="14"/>
+      <ellipse class="svg-hole" cx="50" cy="78" rx="34" ry="9"/>
+      <circle class="svg-ear" cx="30" cy="36" r="9"/>
+      <circle class="svg-ear" cx="70" cy="36" r="9"/>
+      <path class="svg-body" d="M24 78 V58 a26 22 0 0 1 52 0 V78 Z"/>
+      <ellipse class="svg-face" cx="50" cy="66" rx="15" ry="9"/>
+      <path d="M37 48 l8 8 M45 48 l-8 8 M55 48 l8 8 M63 48 l-8 8" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" class="svg-eye-x"/>
+      <circle class="svg-eye" cx="50" cy="62" r="4"/>
+    </symbol>
+  </defs>
+</svg>
+
+<nav class="nav" aria-label="Tài liệu">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">Đập Chuột</a>
+    <div class="nav-links">
+      <a href="index.html">Mục lục</a>
+      <a href="01-tong-quan.html">Tổng quan</a>
+      <a href="02-chuc-nang.html">Chức năng</a>
+      <a href="03-man-hinh.html" aria-current="page">Màn hình</a>
+      <a href="04-quy-tac-du-lieu.html">Quy tắc &amp; dữ liệu</a>
+      <a href="05-ke-hoach-test.html">Kế hoạch test</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero container">
+  <p class="eyebrow">03 · Màn hình</p>
+  <h1>Ba màn hình, một trang.</h1>
+  <p class="lead">Bắt đầu, Đang chơi, Kết thúc là ba trạng thái hiển thị trên cùng một trang. Mỗi lúc chỉ một trạng thái được hiện.</p>
+</header>
+
+<section class="section alt">
+  <div class="container">
+    <h2>Mô phỏng nhanh</h2>
+    <p class="muted">Bản phác ở bề rộng điện thoại (khoảng 320px). Màu và chữ lấy từ <code>design/tokens.css</code>; hình chuột là SVG nội tuyến.</p>
+    <div class="mock-row">
+      <div>
+        <div class="phone" role="img" aria-label="Phác thảo màn hình Bắt đầu">
+          <svg width="96" height="96" aria-hidden="true"><use href="#i-mole"/></svg>
+          <h4>Đập Chuột</h4>
+          <p>Bấm trúng chuột để ghi điểm.<br>Bạn có 30 giây!</p>
+          <p>Kỷ lục: <strong>24</strong></p>
+          <span class="btn">Bắt đầu</span>
+        </div>
+        <p class="mock-cap">MH-01 · Bắt đầu</p>
+      </div>
+      <div>
+        <div class="phone" role="img" aria-label="Phác thảo màn hình Đang chơi">
+          <div class="hud"><span>Điểm: 12</span><span>Thời gian: 18</span></div>
+          <div class="grid">
+            <div class="hole"><svg aria-hidden="true"><use href="#i-hole"/></svg></div>
+            <div class="hole"><svg aria-hidden="true"><use href="#i-mole"/></svg></div>
+            <div class="hole"><svg aria-hidden="true"><use href="#i-hole"/></svg></div>
+            <div class="hole"><svg aria-hidden="true"><use href="#i-hole"/></svg></div>
+            <div class="hole"><svg aria-hidden="true"><use href="#i-hole"/></svg></div>
+            <div class="hole"><svg aria-hidden="true"><use href="#i-hole"/></svg></div>
+            <div class="hole"><svg aria-hidden="true"><use href="#i-hole"/></svg></div>
+            <div class="hole"><svg aria-hidden="true"><use href="#i-hole"/></svg></div>
+            <div class="hole"><svg aria-hidden="true"><use href="#i-hole"/></svg></div>
+          </div>
+        </div>
+        <p class="mock-cap">MH-02 · Đang chơi</p>
+      </div>
+      <div>
+        <div class="phone" role="img" aria-label="Phác thảo màn hình Kết thúc">
+          <h4>Hết giờ!</h4>
+          <p>Điểm của bạn</p>
+          <div class="big-num">27</div>
+          <p>Trúng 27 / 34 con chuột</p>
+          <span class="badge-new">Kỷ lục mới!</span>
+          <p>Kỷ lục: <strong>27</strong></p>
+          <span class="btn">Chơi lại</span>
+        </div>
+        <p class="mock-cap">MH-03 · Kết thúc</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="mh-01">
+  <div class="container">
+    <h2>MH-01 · Màn hình Bắt đầu</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Thành phần</th><th>Nội dung / hành vi</th><th>Token gợi ý</th></tr></thead>
+      <tbody>
+        <tr><td>Hình minh họa</td><td>Một con chuột SVG (không bắt buộc, trang trí, <code>aria-hidden</code>).</td><td>—</td></tr>
+        <tr><td>Tên game</td><td>“Đập Chuột”, là tiêu đề <code>h1</code>.</td><td><code>--text-h1-size</code>, <code>--font-display</code></td></tr>
+        <tr><td>Luật ngắn</td><td>“Bấm trúng chuột để ghi điểm. Bạn có 30 giây!” — con số 30 lấy từ cấu hình.</td><td><code>--text-lead-size</code>, <code>--color-text-secondary</code></td></tr>
+        <tr><td>Kỷ lục</td><td>“Kỷ lục: N”, N = 0 nếu chưa chơi hoặc không đọc được bộ nhớ.</td><td><code>--text-body-size</code></td></tr>
+        <tr><td>Nút “Bắt đầu”</td><td>Thẻ <code>&lt;button&gt;</code>; bấm/Enter/Space để bắt đầu lượt (CN-02). Tự nhận focus khi trang tải xong.</td><td><code>--color-accent</code>, <code>--radius-pill</code>, <code>--button-lg-*</code></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section alt" id="mh-02">
+  <div class="container">
+    <h2>MH-02 · Màn hình Đang chơi</h2>
+    <h3>Thanh trên cùng</h3>
+    <ul>
+      <li><strong>Điểm: N</strong> bên trái, cập nhật ngay khi đập trúng.</li>
+      <li><strong>Thời gian: S</strong> bên phải, S là số giây còn lại làm tròn lên (hiện 30 lúc bắt đầu, về 0 lúc hết giờ).</li>
+      <li>Cỡ chữ tối thiểu 20px, đậm vừa (<code>--font-weight-semibold</code>), số dùng <code>font-variant-numeric: tabular-nums</code> để không nhảy bố cục.</li>
+      <li>Khi S ≤ 5: chữ thời gian đổi sang <code>--color-danger</code>. Không chỉ dựa vào màu: thêm nhịp phóng nhẹ mỗi giây (tắt khi giảm chuyển động).</li>
+    </ul>
+
+    <h3>Lưới 3×3</h3>
+    <ul>
+      <li>9 ô vuông bằng nhau, xếp bằng CSS Grid, căn giữa màn hình.</li>
+      <li>Kích thước ô: <code>clamp(80px, 28vw, 140px)</code>, khe <code>--space-2</code> đến <code>--space-3</code>. Ở 320px: 3 × 88px + 2 × 8px = 280px, vừa khít không cuộn ngang.</li>
+      <li>Ô nền <code>--color-bg-alt</code>, bo <code>--radius-lg</code>.</li>
+      <li>Mỗi ô là một <code>&lt;button&gt;</code> không có focus tab (<code>tabindex="-1"</code>) để bàn phím không phải đi qua 9 ô (QĐ-05: không chơi bằng phím).</li>
+      <li>Nhận thao tác bằng sự kiện <code>pointerdown</code> (phản hồi ngay, không chờ nhả tay, không trễ 300ms trên điện thoại).</li>
+    </ul>
+
+    <h3 id="hinh-ve">Hình vẽ và trạng thái ô</h3>
+    <div class="mock-row">
+      <div class="phone"><div class="hole"><svg aria-hidden="true"><use href="#i-hole"/></svg></div><p class="cap">Trống — chỉ có hang</p></div>
+      <div class="phone"><div class="hole"><svg aria-hidden="true"><use href="#i-mole"/></svg></div><p class="cap">Đang hiện — chuột thò lên</p></div>
+      <div class="phone"><div class="hole"><svg aria-hidden="true"><use href="#i-mole-hit"/></svg><span class="plus">+1</span></div><p class="cap">Bị đập — mắt X, “+1” bay lên</p></div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Trạng thái ô</th><th>Hiển thị</th><th>Hiệu ứng</th></tr></thead>
+      <tbody>
+        <tr><td>Trống</td><td>Miệng hang (hai hình elip).</td><td>—</td></tr>
+        <tr><td>Đang hiện</td><td>Chuột SVG nhô lên từ hang.</td><td>Trượt từ dưới lên bằng <code>transform: translateY</code>, <code>--duration-fast</code> (150ms). Phần chuột bị che dưới miệng hang bằng <code>clip-path</code> hoặc <code>overflow: hidden</code>.</td></tr>
+        <tr><td>Bị đập</td><td>Chuột đổi hình “bị đập” (mắt X, hơi bẹp); chữ “+1” màu <code>--color-success</code>; ô nháy sáng nhẹ.</td><td>Hiện hình bị đập khoảng 150ms rồi thụt xuống; “+1” bay lên và mờ dần trong <code>--duration-slow</code> (400ms).</td></tr>
+        <tr><td>Đang thụt</td><td>Chuột trượt xuống hang.</td><td>150ms. Không nhận điểm (QĐ-02).</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note"><p>Toàn bộ hình vẽ là SVG nội tuyến trong <code>index.html</code>, màu lấy từ biến CSS, nên tự đổi theo chế độ sáng/tối. Không dùng emoji hay file ảnh (QĐ-01).</p></div>
+
+    <h3>Con trỏ búa (tùy chọn)</h3>
+    <p>Trên thiết bị có chuột (<code>@media (pointer: fine)</code>), con trỏ trong lưới là hình búa SVG nhúng dạng <code>data:</code> URI, điểm nóng ở đầu búa; dự phòng <code>pointer</code>.</p>
+  </div>
+</section>
+
+<section class="section" id="mh-03">
+  <div class="container">
+    <h2>MH-03 · Màn hình Kết thúc</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Thành phần</th><th>Nội dung / hành vi</th></tr></thead>
+      <tbody>
+        <tr><td>Tiêu đề</td><td>“Hết giờ!”</td></tr>
+        <tr><td>Điểm lượt</td><td>Số lớn (<code>--text-h1-size</code>), nhãn “Điểm của bạn”.</td></tr>
+        <tr><td>Độ chính xác <span class="tag new">QĐ-04</span></td><td>“Trúng X / Y con chuột”. Nếu Y = 0 thì hiện “Trúng 0 / 0 con chuột”.</td></tr>
+        <tr><td>Kỷ lục mới</td><td>“Kỷ lục mới!” màu <code>--color-accent</code>, chỉ hiện khi điểm lượt &gt; kỷ lục cũ.</td></tr>
+        <tr><td>Kỷ lục</td><td>“Kỷ lục: N” (giá trị sau khi đã cập nhật).</td></tr>
+        <tr><td>Nút “Chơi lại”</td><td>Bắt đầu ngay lượt mới (CN-09). Tự nhận focus khi màn hình hiện, để Enter/Space chơi lại được.</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note warn"><p><strong>Chống bấm nhầm:</strong> nút “Chơi lại” bị vô hiệu trong 500ms đầu sau khi màn hình Kết thúc hiện, để cú chạm dồn dập cuối lượt không vô tình mở lượt mới.</p></div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="container">
+    <h2>Yêu cầu hiển thị chung</h2>
+    <ul>
+      <li>Bố cục co giãn từ <strong>320px</strong> trở lên, không cuộn ngang. Nội dung tối đa <code>--content-max</code>, lề <code>--page-gutter</code>.</li>
+      <li>Ô lưới tối thiểu <strong>80×80px</strong>.</li>
+      <li>Chạm không phóng to, không chọn chữ: <code>touch-action: manipulation</code> cho toàn trang, <code>user-select: none</code> và <code>-webkit-touch-callout: none</code> cho vùng game, <code>-webkit-tap-highlight-color: transparent</code>. Không dùng <code>user-scalable=no</code> trong thẻ viewport.</li>
+      <li>Điểm và thời gian tối thiểu 20px.</li>
+      <li>Chế độ sáng/tối tự theo máy, nhờ token màu theo vai trò.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" id="tro-nang">
+  <div class="container">
+    <h2>Trợ năng cơ bản <span class="tag new">QĐ-05</span></h2>
+    <ul>
+      <li>Nút “Bắt đầu” và “Chơi lại” là <code>&lt;button&gt;</code> thật, dùng được bằng Enter/Space, có vòng focus <code>--shadow-focus</code> khi <code>:focus-visible</code>.</li>
+      <li>Khi chuyển màn hình, focus chuyển tới nút chính của màn hình đó (hoặc tiêu đề nếu không có nút).</li>
+      <li>Kết quả cuối lượt nằm trong vùng <code>aria-live="polite"</code> để trình đọc màn hình đọc “Hết giờ! Điểm 27…”. Không đọc từng giây đếm ngược để tránh ồn.</li>
+      <li>Ô lưới có <code>aria-label</code> “Ô 1” … “Ô 9”, nhưng không nằm trong thứ tự tab.</li>
+      <li><code>@media (prefers-reduced-motion: reduce)</code>: bỏ trượt lên/xuống và “+1” bay — chuột hiện/ẩn ngay, “+1” hiện tĩnh rồi biến mất. Luật thời gian không đổi.</li>
+      <li>Độ tương phản chữ đạt WCAG AA nhờ màu token.</li>
+    </ul>
+  </div>
+</section>
+
+<div class="container pager">
+  <a href="02-chuc-nang.html">‹ Chức năng</a>
+  <a href="04-quy-tac-du-lieu.html">Quy tắc &amp; dữ liệu ›</a>
+</div>
+<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 13/11/2026</div></footer>
+</body>
+</html>

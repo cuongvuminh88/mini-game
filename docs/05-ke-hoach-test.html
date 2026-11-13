@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kế hoạch test — Đập Chuột</title>
+<link rel="stylesheet" href="../design/tokens.css">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<nav class="nav" aria-label="Tài liệu">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">Đập Chuột</a>
+    <div class="nav-links">
+      <a href="index.html">Mục lục</a>
+      <a href="01-tong-quan.html">Tổng quan</a>
+      <a href="02-chuc-nang.html">Chức năng</a>
+      <a href="03-man-hinh.html">Màn hình</a>
+      <a href="04-quy-tac-du-lieu.html">Quy tắc &amp; dữ liệu</a>
+      <a href="05-ke-hoach-test.html" aria-current="page">Kế hoạch test</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero container">
+  <p class="eyebrow">05 · Kế hoạch test</p>
+  <h1>Làm sao biết là xong.</h1>
+  <p class="lead">Ca kiểm thử thủ công gắn với từng chức năng và quy tắc, cộng ma trận thiết bị. Game đạt khi mọi ca bắt buộc đều qua.</p>
+</header>
+
+<section class="section alt">
+  <div class="container">
+    <h2>Cách test</h2>
+    <ul>
+      <li><strong>Thủ công</strong> trên trình duyệt thật, mở trực tiếp <code>index.html</code> bằng <code>file://</code>.</li>
+      <li><strong>Hỗ trợ test:</strong> cho phép ghi đè cấu hình qua tham số URL chỉ dùng khi test, ví dụ <code>index.html?round=5000&amp;up=3000</code> (lượt 5 giây, chuột hiện 3 giây) để kiểm tra nhanh. Khi không có tham số, dùng giá trị mặc định.</li>
+      <li><strong>Đo thời gian:</strong> dùng đồng hồ bấm giờ điện thoại hoặc ghi màn hình, so với đồng hồ game.</li>
+      <li><strong>Console:</strong> mở DevTools suốt quá trình test; bất kỳ lỗi đỏ nào đều tính là trượt ca TC-40.</li>
+      <li>Kết quả ghi vào cột “Kết quả” bằng: Đạt / Trượt / Chưa test, kèm trình duyệt và ngày.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Ca kiểm thử chức năng</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Bước</th><th>Kết quả mong đợi</th><th>Liên quan</th><th>Kết quả</th></tr></thead>
+      <tbody>
+        <tr><td class="id">TC-01</td><td>Xóa dữ liệu trang, mở <code>index.html</code>.</td><td>Thấy “Đập Chuột”, luật ngắn, “Kỷ lục: 0”, nút “Bắt đầu” đang có focus.</td><td>CN-01</td><td></td></tr>
+        <tr><td class="id">TC-02</td><td>Bấm “Bắt đầu”.</td><td>Hiện lưới 3×3, “Điểm: 0”, “Thời gian: 30”.</td><td>CN-02</td><td></td></tr>
+        <tr><td class="id">TC-03</td><td>Bắt đầu lượt, bấm đồng hồ ngoài cùng lúc, không chạm gì.</td><td>Game về 0 và chuyển màn hình Kết thúc trong khoảng 29–31 giây đồng hồ ngoài. Số giảm đều mỗi giây, không nhảy cóc 2 giây.</td><td>CN-03, QT-30, QT-31</td><td></td></tr>
+        <tr><td class="id">TC-04</td><td>Quan sát đồng hồ ở giây cuối.</td><td>Chữ đổi màu đỏ đúng từ lúc hiện “5” và giữ đỏ đến 0.</td><td>CN-03, QT-33</td><td></td></tr>
+        <tr><td class="id">TC-05</td><td>Quan sát 1 lượt không bấm, ghi lại ô của từng con.</td><td>Mỗi lúc tối đa 1 chuột; không có hai con liên tiếp cùng ô; mọi ô đều từng có chuột.</td><td>CN-04, QT-24</td><td></td></tr>
+        <tr><td class="id">TC-06</td><td>Không bấm, đo thời gian một con hiện bằng ghi màn hình.</td><td>Mỗi con hiện khoảng 0,6–1,2 giây; nghỉ khoảng 0,2–0,5 giây (cộng hiệu ứng 150ms).</td><td>CN-04, QT-02</td><td></td></tr>
+        <tr><td class="id">TC-07</td><td>Đập trúng một con chuột.</td><td>Điểm +1 ngay; chuột đổi hình bị đập, “+1” bay lên; chuột thụt xuống.</td><td>CN-05</td><td></td></tr>
+        <tr><td class="id">TC-08</td><td>Bấm thật nhanh 5 lần vào cùng một con (chuột và ngón tay).</td><td>Chỉ +1.</td><td>CN-05, QT-21</td><td></td></tr>
+        <tr><td class="id">TC-09</td><td>Bấm vào nhiều ô trống.</td><td>Điểm không đổi, không có “+1”.</td><td>CN-06</td><td></td></tr>
+        <tr><td class="id">TC-10</td><td>Dùng <code>?up=3000</code> để chuột hiện lâu; chờ chuột bắt đầu thụt rồi bấm.</td><td>Không cộng điểm.</td><td>CN-06, QT-20, QĐ-02</td><td></td></tr>
+        <tr><td class="id">TC-11</td><td>Bấm liên tục vào lưới trong 2 giây cuối và tiếp tục sau khi về 0.</td><td>Chuột biến mất ở 0; cú bấm sau 0 không cộng điểm; điểm ở màn hình Kết thúc bằng điểm cuối cùng trên thanh trên.</td><td>CN-07, QT-32</td><td></td></tr>
+        <tr><td class="id">TC-12</td><td>Kết thúc lượt, đếm số chuột và số lần trúng (ghi màn hình).</td><td>“Trúng X / Y con chuột” khớp; X = điểm.</td><td>CN-10, QT-26</td><td></td></tr>
+        <tr><td class="id">TC-13</td><td>Kỷ lục đang là N, chơi được điểm &gt; N.</td><td>Hiện “Kỷ lục mới!”, kỷ lục = điểm mới.</td><td>CN-08, QT-43</td><td></td></tr>
+        <tr><td class="id">TC-14</td><td>Chơi được điểm = kỷ lục, rồi điểm &lt; kỷ lục.</td><td>Cả hai lần không hiện “Kỷ lục mới!”, kỷ lục giữ nguyên.</td><td>CN-08, QT-43</td><td></td></tr>
+        <tr><td class="id">TC-15</td><td>Sau TC-13, tải lại trang.</td><td>Màn hình Bắt đầu hiện kỷ lục mới.</td><td>CN-08, QT-40</td><td></td></tr>
+        <tr><td class="id">TC-16</td><td>Trong DevTools đặt <code>dap-chuot.highScore</code> = <code>"abc"</code>, rồi <code>"-5"</code>, rồi <code>"3.7"</code>; tải lại mỗi lần.</td><td>Hiện “Kỷ lục: 0”, không lỗi.</td><td>QT-41</td><td></td></tr>
+        <tr><td class="id">TC-17</td><td>Mở bằng cửa sổ riêng tư / chặn dữ liệu trang (cookie &amp; site data) rồi chơi 2 lượt.</td><td>Game chạy bình thường; kỷ lục giữ trong phiên; không có lỗi đỏ trong Console.</td><td>CN-08, QT-42</td><td></td></tr>
+        <tr><td class="id">TC-18</td><td>Bấm “Chơi lại”.</td><td>Lượt mới ngay: điểm 0, thời gian 30.</td><td>CN-09</td><td></td></tr>
+        <tr><td class="id">TC-19</td><td>Chơi lại 10 lượt liên tiếp (dùng <code>?round=5000</code>), mỗi lượt bấm “Chơi lại” ngay khi được.</td><td>Đồng hồ luôn giảm 1 giây mỗi giây (không giảm gấp đôi); nhịp xuất hiện chuột không nhanh dần; không có hai chuột cùng lúc.</td><td>CN-09, QT-12</td><td></td></tr>
+        <tr><td class="id">TC-20</td><td>Bấm đúp thật nhanh “Bắt đầu”; ở màn hình Kết thúc chạm dồn dập vào vị trí nút “Chơi lại”.</td><td>Chỉ một lượt khởi động; “Chơi lại” không kích hoạt trong 500ms đầu.</td><td>QT-11, QT-53</td><td></td></tr>
+        <tr><td class="id">TC-21</td><td>Đang chơi (còn ~20 giây), chuyển tab 5 giây rồi quay lại.</td><td>Đồng hồ còn ~15 giây; không có hai chuột; game chạy tiếp.</td><td>QT-50, QĐ-03</td><td></td></tr>
+        <tr><td class="id">TC-22</td><td>Đang chơi, chuyển tab 40 giây rồi quay lại.</td><td>Hiện ngay màn hình Kết thúc với điểm trước khi rời tab.</td><td>QT-50, QĐ-03</td><td></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="container">
+    <h2>Ca kiểm thử giao diện &amp; trợ năng</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Bước</th><th>Kết quả mong đợi</th><th>Liên quan</th><th>Kết quả</th></tr></thead>
+      <tbody>
+        <tr><td class="id">TC-30</td><td>Thu cửa sổ / giả lập về bề rộng 320px, qua đủ 3 màn hình.</td><td>Không có thanh cuộn ngang; ô lưới ≥ 80×80px (đo bằng DevTools).</td><td>MH chung</td><td></td></tr>
+        <tr><td class="id">TC-31</td><td>Đo cỡ chữ điểm và thời gian.</td><td>≥ 20px.</td><td>MH-02</td><td></td></tr>
+        <tr><td class="id">TC-32</td><td>Trên điện thoại, chạm nhanh liên tiếp, chạm đúp và giữ lâu vào lưới.</td><td>Trang không phóng to, không bôi chọn chữ, không hiện menu lưu ảnh.</td><td>MH chung</td><td></td></tr>
+        <tr><td class="id">TC-33</td><td>Chuyển máy sang chế độ tối.</td><td>Ba màn hình đọc rõ; chuột và hang vẫn nhìn rõ trên nền tối.</td><td>QĐ-01</td><td></td></tr>
+        <tr><td class="id">TC-34</td><td>Chỉ dùng bàn phím: Tab tới “Bắt đầu”, nhấn Enter; hết lượt nhấn Space.</td><td>Bắt đầu được; có vòng focus; màn hình Kết thúc focus vào “Chơi lại”, Space bắt đầu lượt mới.</td><td>CN-11, QĐ-05</td><td></td></tr>
+        <tr><td class="id">TC-35</td><td>Bật “Giảm chuyển động” trong hệ điều hành, chơi 1 lượt.</td><td>Chuột hiện/ẩn không trượt; “+1” không bay; luật thời gian không đổi.</td><td>CN-11</td><td></td></tr>
+        <tr><td class="id">TC-36</td><td>Bật VoiceOver / TalkBack, chơi hết một lượt.</td><td>Kết quả cuối lượt được đọc lên; không đọc từng giây.</td><td>CN-11</td><td></td></tr>
+        <tr><td class="id">TC-37</td><td>Trên máy tính, rê chuột vào lưới.</td><td>Con trỏ hình búa (nếu đã làm CN-12).</td><td>CN-12 <span class="tag">Tùy chọn</span></td><td></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Ca kiểm thử bàn giao</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Bước</th><th>Kết quả mong đợi</th><th>Kết quả</th></tr></thead>
+      <tbody>
+        <tr><td class="id">TC-40</td><td>Mở DevTools, chơi trọn một lượt và chơi lại một lượt.</td><td>Không có lỗi trong Console.</td><td></td></tr>
+        <tr><td class="id">TC-41</td><td>Chép thư mục game sang máy khác, ngắt mạng, nhấp đúp <code>index.html</code>.</td><td>Chơi được ngay, không cần máy chủ hay Internet.</td><td></td></tr>
+        <tr><td class="id">TC-42</td><td>Đọc code: tìm các số 30, 600, 1200, 200, 500, 3.</td><td>Chỉ xuất hiện trong <code>CONFIG</code>. Đổi <code>ROUND_MS</code> thành 10000 thì lượt dài 10 giây và luật ngắn hiện “10 giây”.</td><td></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="container">
+    <h2>Ma trận thiết bị</h2>
+    <p class="muted">Mỗi ô ghi Đạt / Trượt. Bộ “Chính” gồm TC-01→TC-22 và TC-40; bộ “Chạm” gồm TC-07, TC-08, TC-30, TC-32.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Thiết bị / trình duyệt</th><th>Bộ Chính</th><th>Bộ Chạm</th><th>TC-33 (tối)</th><th>TC-34–36 (trợ năng)</th></tr></thead>
+      <tbody>
+        <tr><td>macOS · Chrome mới nhất</td><td></td><td>—</td><td></td><td>TC-34, TC-35</td></tr>
+        <tr><td>macOS · Safari mới nhất</td><td></td><td>—</td><td></td><td>TC-34, TC-36 (VoiceOver)</td></tr>
+        <tr><td>macOS hoặc Windows · Firefox mới nhất</td><td></td><td>—</td><td></td><td>TC-34</td></tr>
+        <tr><td>Windows · Edge mới nhất</td><td></td><td>—</td><td></td><td>TC-34</td></tr>
+        <tr><td>iPhone · Safari iOS</td><td></td><td></td><td></td><td>TC-35, TC-36</td></tr>
+        <tr><td>Android · Chrome</td><td></td><td></td><td></td><td>TC-36 (TalkBack)</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Đối chiếu tiêu chí hoàn thành</h2>
+    <p>Mỗi tiêu chí trong mục 6 của YEU-CAU.md được phủ bởi ít nhất một ca.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Tiêu chí (YEU-CAU.md §6)</th><th>Ca kiểm thử</th></tr></thead>
+      <tbody>
+        <tr><td>Màn hình Bắt đầu đủ thành phần</td><td>TC-01</td></tr>
+        <tr><td>Bấm “Bắt đầu” → lưới, điểm 0, thời gian 30</td><td>TC-02</td></tr>
+        <tr><td>Đồng hồ đúng, sai lệch ≤ 1 giây</td><td>TC-03, TC-21</td></tr>
+        <tr><td>Chuột ngẫu nhiên, tối đa 1, không lặp ô liền kề</td><td>TC-05</td></tr>
+        <tr><td>Chuột tự thụt khi hết giờ hiện</td><td>TC-06</td></tr>
+        <tr><td>Trúng +1 và có phản hồi</td><td>TC-07</td></tr>
+        <tr><td>Bấm nhiều lần cùng con chỉ +1</td><td>TC-08</td></tr>
+        <tr><td>Bấm ô trống không đổi điểm</td><td>TC-09, TC-10</td></tr>
+        <tr><td>≤ 5 giây đổi màu</td><td>TC-04</td></tr>
+        <tr><td>Hết giờ: chuột biến mất, khóa bấm, điểm đúng</td><td>TC-11</td></tr>
+        <tr><td>Phá kỷ lục → cập nhật, “Kỷ lục mới!”</td><td>TC-13, TC-14</td></tr>
+        <tr><td>Tải lại vẫn còn kỷ lục</td><td>TC-15</td></tr>
+        <tr><td>Chơi lại nhiều lần vẫn đúng</td><td>TC-18, TC-19, TC-20</td></tr>
+        <tr><td>Chạy đúng Chrome, Safari, Firefox máy tính</td><td>Ma trận thiết bị</td></tr>
+        <tr><td>Chạy đúng điện thoại, không phóng to, không cuộn ngang 320px</td><td>TC-30, TC-32, ma trận</td></tr>
+        <tr><td>Không lỗi Console</td><td>TC-40, TC-17</td></tr>
+        <tr><td>Mở trực tiếp <code>index.html</code> chơi được</td><td>TC-41</td></tr>
+        <tr><td>Thông số tập trung một chỗ</td><td>TC-42</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<div class="container pager">
+  <a href="04-quy-tac-du-lieu.html">‹ Quy tắc &amp; dữ liệu</a>
+  <a href="index.html">Mục lục ›</a>
+</div>
+<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 13/11/2026</div></footer>
+</body>
+</html>
