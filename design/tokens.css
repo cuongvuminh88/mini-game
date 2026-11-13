@@ -1,0 +1,244 @@
+/* =========================================================================
+   tokens.css — Design tokens
+   Phong cách: tối giản, nhiều khoảng trắng, chữ lớn đậm vừa, nút bo tròn
+   hẳn hai đầu, một màu nhấn xanh duy nhất. Lấy cảm hứng từ cách trình bày
+   của apple.com (chỉ học phong cách: không dùng logo, hình ảnh, nội dung,
+   và không nhúng font độc quyền — font lấy từ hệ thống của máy người xem).
+
+   Cách dùng:  <link rel="stylesheet" href="design/tokens.css">
+               rồi dùng var(--ten-token) trong CSS của bạn.
+   Chế độ tối: tự động theo máy; ép sáng/tối bằng
+               <html data-theme="light"> hoặc <html data-theme="dark">.
+   ========================================================================= */
+
+:root {
+  /* ---------------------------------------------------------------------
+     1. MÀU GỐC (palette) — không dùng trực tiếp trong giao diện,
+        hãy dùng nhóm "màu theo vai trò" ở mục 2.
+     --------------------------------------------------------------------- */
+  --palette-white:      #ffffff;
+  --palette-gray-50:    #fbfbfd;
+  --palette-gray-100:   #f5f5f7;   /* nền khối xám nhạt */
+  --palette-gray-200:   #e8e8ed;   /* viền, đường kẻ */
+  --palette-gray-300:   #d2d2d7;
+  --palette-gray-500:   #86868b;   /* chữ phụ */
+  --palette-gray-600:   #6e6e73;
+  --palette-gray-800:   #424245;
+  --palette-gray-900:   #1d1d1f;   /* chữ chính */
+  --palette-gray-950:   #161617;   /* nền tối */
+  --palette-black:      #000000;
+
+  --palette-blue-500:   #0071e3;   /* nút chính */
+  --palette-blue-600:   #0077ed;   /* nút chính khi rê chuột */
+  --palette-blue-700:   #0066cc;   /* liên kết trên nền sáng */
+  --palette-blue-300:   #2997ff;   /* liên kết trên nền tối */
+
+  --palette-green-600:  #008009;
+  --palette-orange-600: #b64400;
+  --palette-red-600:    #e30000;
+
+  /* ---------------------------------------------------------------------
+     2. MÀU THEO VAI TRÒ (dùng cái này trong giao diện)
+     --------------------------------------------------------------------- */
+  --color-bg:              var(--palette-white);     /* nền trang */
+  --color-bg-alt:          var(--palette-gray-100);  /* nền khối xen kẽ, thẻ */
+  --color-bg-elevated:     var(--palette-white);     /* thẻ nằm trên nền xám */
+  --color-bg-inverse:      var(--palette-black);     /* khối nền đen nổi bật */
+
+  --color-text:            var(--palette-gray-900);  /* chữ chính */
+  --color-text-secondary:  var(--palette-gray-600);  /* chữ phụ, mô tả */
+  --color-text-tertiary:   var(--palette-gray-500);  /* chú thích, placeholder */
+  --color-text-inverse:    var(--palette-gray-100);  /* chữ trên nền đen */
+
+  --color-border:          var(--palette-gray-300);
+  --color-border-subtle:   var(--palette-gray-200);
+  --color-border-strong:   var(--palette-gray-500);  /* viền ô nhập */
+
+  --color-accent:          var(--palette-blue-500);  /* nút chính */
+  --color-accent-hover:    var(--palette-blue-600);
+  --color-accent-text:     var(--palette-white);     /* chữ trên nút chính */
+  --color-link:            var(--palette-blue-700);
+  --color-focus-ring:      rgba(0, 125, 250, 0.6);
+
+  --color-success:         var(--palette-green-600);
+  --color-warning:         var(--palette-orange-600);
+  --color-danger:          var(--palette-red-600);
+
+  --color-overlay:         rgba(0, 0, 0, 0.4);
+  --color-nav-glass:       rgba(251, 251, 253, 0.8); /* thanh điều hướng mờ */
+
+  /* ---------------------------------------------------------------------
+     3. KIỂU CHỮ
+     Font hệ thống: trên máy Apple hiển thị SF Pro, máy khác dùng
+     Segoe UI / Roboto / Helvetica. Không cần tải font.
+     --------------------------------------------------------------------- */
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                  "Helvetica Neue", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-text:    -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                  "Helvetica Neue", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --font-weight-regular:  400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;   /* tiêu đề */
+  --font-weight-bold:     700;
+
+  /* ---------------------------------------------------------------------
+     4. CỠ CHỮ — mỗi bậc có cỡ / độ cao dòng / khoảng cách chữ đi kèm.
+     Đặc trưng của phong cách: chữ càng lớn thì dòng càng khít,
+     khoảng cách chữ hơi âm ở cỡ thân bài.
+     --------------------------------------------------------------------- */
+  --text-hero-size:      clamp(40px, 7vw, 80px);  /* tiêu đề trang chủ */
+  --text-hero-line:      1.05;
+  --text-hero-tracking:  -0.015em;
+
+  --text-h1-size:        clamp(32px, 5vw, 56px);
+  --text-h1-line:        1.07;
+  --text-h1-tracking:    -0.005em;
+
+  --text-h2-size:        clamp(28px, 3.6vw, 40px);
+  --text-h2-line:        1.1;
+  --text-h2-tracking:    0;
+
+  --text-h3-size:        32px;   /* tiêu đề thẻ */
+  --text-h3-line:        1.125;
+  --text-h3-tracking:    0.004em;
+
+  --text-h4-size:        21px;
+  --text-h4-line:        1.19;
+  --text-h4-tracking:    0.011em;
+
+  --text-lead-size:      19px;   /* đoạn mở đầu, phụ đề thẻ */
+  --text-lead-line:      1.21;
+  --text-lead-tracking:  0.012em;
+
+  --text-body-size:      17px;   /* thân bài */
+  --text-body-line:      1.47;
+  --text-body-tracking:  -0.022em;
+
+  --text-small-size:     14px;   /* nút, nhãn */
+  --text-small-line:     1.29;
+  --text-small-tracking: -0.016em;
+
+  --text-caption-size:   12px;   /* chú thích, chân trang */
+  --text-caption-line:   1.33;
+  --text-caption-tracking: -0.01em;
+
+  /* ---------------------------------------------------------------------
+     5. KHOẢNG CÁCH — thang 4px; khối lớn rất thoáng.
+     --------------------------------------------------------------------- */
+  --space-0:   0;
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;   /* khe giữa các thẻ */
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-20:  80px;   /* khoảng đệm trên/dưới một khối */
+  --space-24:  96px;
+
+  --page-gutter:     max(22px, 4vw);  /* lề trái/phải của trang */
+  --content-max:     980px;           /* bề rộng nội dung chữ */
+  --content-max-wide: 1440px;         /* bề rộng lưới thẻ */
+
+  /* ---------------------------------------------------------------------
+     6. BO GÓC
+     --------------------------------------------------------------------- */
+  --radius-none: 0;
+  --radius-xs:   6px;    /* nhãn nhỏ */
+  --radius-sm:   8px;    /* menu, ô nhỏ */
+  --radius-md:   12px;   /* ô nhập */
+  --radius-lg:   18px;   /* thẻ */
+  --radius-xl:   28px;   /* khối lớn, hộp thoại */
+  --radius-pill: 980px;  /* nút: bo tròn hẳn hai đầu */
+  --radius-full: 50%;    /* nút tròn, ảnh đại diện */
+
+  /* ---------------------------------------------------------------------
+     7. ĐỔ BÓNG & CHUYỂN ĐỘNG — dùng rất tiết chế.
+     --------------------------------------------------------------------- */
+  --shadow-card:       0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --shadow-focus:      0 0 0 4px var(--color-focus-ring);
+
+  --blur-glass: saturate(180%) blur(20px);
+
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 400ms;
+
+  /* ---------------------------------------------------------------------
+     8. KÍCH THƯỚC THÀNH PHẦN
+     --------------------------------------------------------------------- */
+  --button-padding-y:    8px;
+  --button-padding-x:    16px;
+  --button-lg-padding-y: 12px;
+  --button-lg-padding-x: 22px;
+  --input-height:        52px;
+  --nav-height:          44px;
+
+  color-scheme: light;
+}
+
+/* ---------------------------------------------------------------------
+   CHẾ ĐỘ TỐI — chỉ đổi màu theo vai trò, mọi token khác giữ nguyên.
+   --------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg:             var(--palette-black);
+    --color-bg-alt:         var(--palette-gray-950);
+    --color-bg-elevated:    #1d1d1f;
+    --color-bg-inverse:     var(--palette-gray-100);
+
+    --color-text:           var(--palette-gray-100);
+    --color-text-secondary: #a1a1a6;
+    --color-text-tertiary:  var(--palette-gray-500);
+    --color-text-inverse:   var(--palette-gray-900);
+
+    --color-border:         var(--palette-gray-800);
+    --color-border-subtle:  #2c2c2e;
+    --color-border-strong:  var(--palette-gray-600);
+
+    --color-link:           var(--palette-blue-300);
+    --color-success:        #30d158;
+    --color-warning:        #ff9f0a;
+    --color-danger:         #ff453a;
+
+    --color-nav-glass:      rgba(22, 22, 23, 0.8);
+    --shadow-card:          0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-card-hover:    0 8px 30px rgba(0, 0, 0, 0.6);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg:             var(--palette-black);
+  --color-bg-alt:         var(--palette-gray-950);
+  --color-bg-elevated:    #1d1d1f;
+  --color-bg-inverse:     var(--palette-gray-100);
+
+  --color-text:           var(--palette-gray-100);
+  --color-text-secondary: #a1a1a6;
+  --color-text-tertiary:  var(--palette-gray-500);
+  --color-text-inverse:   var(--palette-gray-900);
+
+  --color-border:         var(--palette-gray-800);
+  --color-border-subtle:  #2c2c2e;
+  --color-border-strong:  var(--palette-gray-600);
+
+  --color-link:           var(--palette-blue-300);
+  --color-success:        #30d158;
+  --color-warning:        #ff9f0a;
+  --color-danger:         #ff453a;
+
+  --color-nav-glass:      rgba(22, 22, 23, 0.8);
+  --shadow-card:          0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover:    0 8px 30px rgba(0, 0, 0, 0.6);
+
+  color-scheme: dark;
+}
