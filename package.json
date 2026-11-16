@@ -1,0 +1,13 @@
+{
+  "name": "dap-chuot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Game Đập Chuột chạy trên trình duyệt, phục vụ bởi một server Node.js nhỏ",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

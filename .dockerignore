@@ -1,0 +1,29 @@
+# Git và công cụ
+.git
+.gitignore
+.dockerignore
+.claude
+
+# Tài liệu không cần trong image
+docs
+YEU-CAU.md
+README.md
+
+# File rác macOS
+._*
+**/._*
+.DS_Store
+**/.DS_Store
+
+# Node
+node_modules
+npm-debug.log*
+*.log
+
+# Bí mật
+.env
+.env.*
+
+# File Docker
+Dockerfile
+compose.yaml
