@@ -242,6 +242,21 @@
     else audioCtx.resume().then(play, function () {});
   }
 
+  // Tiếng “tích–tắc” của đồng hồ: nốt rất ngắn, xen kẽ cao (tích) / thấp (tắc).
+  // Nhỏ trong suốt lượt chơi, to hơn ở những giây cuối (urgent).
+  function playTickSound(high, urgent) {
+    if (!audioCtx || audioCtx.state !== 'running') return;
+    try {
+      const t = audioCtx.currentTime;
+      const out = audioCtx.createGain();
+      out.gain.value = urgent ? 0.35 : 0.12;
+      out.connect(audioCtx.destination);
+      playNote(out, 'triangle', high ? 1800 : 1250, t, 0.05, 0.6);
+    } catch (e) {
+      /* bỏ qua lỗi âm thanh */
+    }
+  }
+
   // Nhạc “victory” khi hiện bảng điểm: đô–mi–sol–đô rồi hợp âm Đô trưởng ngân dài
   function playVictorySound() {
     if (!audioCtx || audioCtx.state !== 'running') return;
@@ -376,6 +391,8 @@
     const warn = secs <= CONFIG.WARNING_AT_S;
     el.hudTimeWrap.classList.toggle('is-warning', warn);
     if (warn) restartClass(el.hudTimeWrap, 'is-pulse');
+    // Tích–tắc mỗi giây, to hơn ở những giây cuối (0 giây đã có nhạc victory)
+    if (secs > 0 && state.phase === PHASE.PLAYING) playTickSound(secs % 2 === 1, warn);
     else el.hudTimeWrap.classList.remove('is-pulse');
   }
 
