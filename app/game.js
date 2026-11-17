@@ -218,6 +218,30 @@
     osc.stop(start + dur + 0.02);
   }
 
+  // Tiếng “bắt đầu”: hai nốt ngắn đi lên rồi một nốt cao ngân (“tinh–tinh–TING!”).
+  // Gọi ngay trong cú bấm, lúc AudioContext có thể vẫn đang mở khóa (resume
+  // chưa xong, nhất là lần bấm đầu trên iOS) → chờ resume rồi mới phát.
+  function playStartSound() {
+    if (!audioCtx) return;
+    const play = function () {
+      if (audioCtx.state !== 'running') return;
+      try {
+        const t = audioCtx.currentTime + 0.02;
+        const out = audioCtx.createGain();
+        out.gain.value = 0.3;
+        out.connect(audioCtx.destination);
+        playNote(out, 'square', 587.33, t, 0.08, 0.25);          // Rê5
+        playNote(out, 'square', 783.99, t + 0.1, 0.08, 0.25);    // Sol5
+        playNote(out, 'triangle', 1174.66, t + 0.2, 0.35, 0.4);  // Rê6
+        playNote(out, 'square', 1174.66, t + 0.2, 0.3, 0.1);
+      } catch (e) {
+        /* bỏ qua lỗi âm thanh */
+      }
+    };
+    if (audioCtx.state === 'running') play();
+    else audioCtx.resume().then(play, function () {});
+  }
+
   // Nhạc “victory” khi hiện bảng điểm: đô–mi–sol–đô rồi hợp âm Đô trưởng ngân dài
   function playVictorySound() {
     if (!audioCtx || audioCtx.state !== 'running') return;
@@ -385,7 +409,8 @@
     if (state.phase === PHASE.PLAYING) return;                              // QT-11
     if (state.phase === PHASE.END && now() < replayLockedUntil) return;     // QT-53
 
-    clearRoundTimers();                                                    // QT-12
+    playStartSound();
+    clearRoundTimers();                                                   // QT-12
     clearTimeout(replayUnlockTimer);
     state.roundId += 1;
     state.score = 0;
