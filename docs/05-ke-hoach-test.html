@@ -163,7 +163,7 @@
     <ul>
       <li><strong>Môi trường:</strong> chạy bằng <code>docker compose up -d --build</code>, mở <code>http://localhost:3000</code> (không dùng <code>file://</code>, xem QT-90). File <code>.env</code> test có <code>ADMIN_USER</code> và <code>ADMIN_PASSWORD</code> ≥ 12 ký tự, không dùng mật khẩu thật.</li>
       <li><strong>Dữ liệu sạch:</strong> trước mỗi đợt test, <code>docker compose down -v</code> để xoá volume database, và xoá dữ liệu trang trên trình duyệt.</li>
-      <li><strong>Kiểm tra database:</strong> <code>docker compose exec app node -e "…"</code> hoặc chép file <code>.db</code> ra mở bằng công cụ SQLite, để đối chiếu với giao diện.</li>
+      <li><strong>Kiểm tra database:</strong> <code>docker compose exec db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'</code> rồi chạy câu <code>SELECT</code>, để đối chiếu với giao diện.</li>
       <li><strong>Gọi API trực tiếp</strong> bằng <code>curl</code> cho các ca máy chủ phải tự chặn (TC-56, TC-63, TC-91…). Chỉ dùng dữ liệu giả, ví dụ <code>test01@example.com</code>.</li>
       <li>Ca TC-40 (không lỗi Console) áp dụng cho cả trang game và trang admin.</li>
     </ul>
@@ -204,10 +204,10 @@
         <tr><td class="id">TC-64</td><td>Dừng máy chủ, chơi hết 1 lượt, rồi bấm “Chơi lại” ngay.</td><td>MH-03 hiện “Chưa lưu được kết quả lượt này.” trong ≤ 5 giây; kỷ lục trên trình duyệt vẫn cập nhật đúng; “Chơi lại” hoạt động bình thường; không có lỗi đỏ trong Console.</td><td>CN-16, QT-72</td><td></td></tr>
         <tr><td class="id">TC-65</td><td>Dùng <code>curl</code> gửi <code>POST /api/rounds</code> với: <code>score≠hits</code>; <code>hits&gt;spawned</code>; số âm; số thập phân; <code>spawned=500</code>; không có token; token sai.</td><td>5 trường hợp đầu trả 400; 2 trường hợp cuối trả 404. Không có dòng nào được lưu.</td><td>QT-71</td><td></td></tr>
         <tr><td class="id">TC-66</td><td>Dùng <code>curl</code> gửi 2 lượt hợp lệ cách nhau 5 giây với cùng token.</td><td>Lượt đầu 201, lượt sau 429.</td><td>QT-70</td><td></td></tr>
-        <tr><td class="id">TC-67</td><td>Ở MH-01 bấm “Không phải bạn?”.</td><td>Hiện MH-04 trống; <code>dap-chuot.player</code> và <code>dap-chuot.highScore</code> bị xoá khỏi localStorage; database không đổi.</td><td>CN-15, QT-69</td><td></td></tr>
-        <tr><td class="id">TC-68</td><td>Admin xoá Lan (TC-82), rồi trên trình duyệt của Lan tải lại trang.</td><td>Hiện MH-04; <code>dap-chuot.player</code> bị xoá.</td><td>CN-14, QT-68, QT-86</td><td></td></tr>
+        <tr><td class="id">TC-67</td><td>Ở MH-01 bấm “Không phải bạn?”.</td><td>Hiện MH-04 trống; <code>dap-sep.player</code> và <code>dap-sep.highScore</code> bị xoá khỏi localStorage; database không đổi.</td><td>CN-15, QT-69</td><td></td></tr>
+        <tr><td class="id">TC-68</td><td>Admin xoá Lan (TC-82), rồi trên trình duyệt của Lan tải lại trang.</td><td>Hiện MH-04; <code>dap-sep.player</code> bị xoá.</td><td>CN-14, QT-68, QT-86</td><td></td></tr>
         <tr><td class="id">TC-69</td><td>Có token hợp lệ trong localStorage, dừng máy chủ, tải lại trang (mở qua bản lưu bộ nhớ đệm hoặc giả lập mạng lỗi chỉ cho <code>/api</code>).</td><td>Vẫn vào MH-01 “Xin chào, Lan”, không bắt đăng ký lại.</td><td>QT-68</td><td></td></tr>
-        <tr><td class="id">TC-70</td><td>Trong DevTools đặt <code>dap-chuot.player</code> = <code>"abc"</code> rồi <code>{"name":"X"}</code>; tải lại mỗi lần.</td><td>Hiện MH-04, không lỗi đỏ.</td><td>QT-67</td><td></td></tr>
+        <tr><td class="id">TC-70</td><td>Trong DevTools đặt <code>dap-sep.player</code> = <code>"abc"</code> rồi <code>{"name":"X"}</code>; tải lại mỗi lần.</td><td>Hiện MH-04, không lỗi đỏ.</td><td>QT-67</td><td></td></tr>
         <tr><td class="id">TC-71</td><td>Cửa sổ riêng tư / chặn dữ liệu trang: đăng ký, chơi 2 lượt, tải lại.</td><td>Đăng ký và chơi được, 2 lượt được lưu; sau khi tải lại phải đăng ký lại bằng cùng email và database không sinh dòng trùng.</td><td>QT-67, QT-65</td><td></td></tr>
       </tbody>
     </table></div>
@@ -251,9 +251,9 @@
         <tr><td class="id">TC-90</td><td>Đăng ký người chơi tên <code>Lan&lt;img src=x onerror=alert(1)&gt;</code> bằng <code>curl</code> (bỏ qua kiểm tra họ tên nếu cần, bằng cách chèn thẳng vào database), mở MH-11.</td><td><code>curl</code> bị từ chối 400 (QT-61). Dòng chèn thẳng hiển thị nguyên văn dưới dạng chữ, không bật hộp thoại.</td><td>QT-61, QT-87</td><td></td></tr>
         <tr><td class="id">TC-91</td><td>Đang đăng nhập admin, từ một trang ở địa chỉ khác (ví dụ <code>http://127.0.0.1:8080</code>) gửi <code>fetch</code> <code>DELETE /api/admin/players/1</code> kèm <code>credentials: "include"</code>.</td><td>Bị chặn (cookie không được gửi hoặc 403); người chơi không bị xoá.</td><td>QT-83</td><td></td></tr>
         <tr><td class="id">TC-92</td><td>Chạy toàn bộ TC-50→TC-88, rồi đọc <code>docker compose logs</code>.</td><td>Không có họ tên, email, số điện thoại, token, mật khẩu hay từ khoá tìm kiếm nào trong log.</td><td>QT-73</td><td></td></tr>
-        <tr><td class="id">TC-93</td><td>Đăng ký 2 người, chơi vài lượt; <code>docker compose down</code> rồi <code>up -d --build</code>.</td><td>Dữ liệu còn nguyên. Sau <code>down -v</code> thì dữ liệu mất (đúng như QT-91).</td><td>QT-91</td><td></td></tr>
-        <tr><td class="id">TC-94</td><td>Đọc code máy chủ: tìm mọi câu SQL.</td><td>Tất cả dùng <code>prepare</code> với tham số, không có ghép chuỗi.</td><td>QT-75</td><td></td></tr>
-        <tr><td class="id">TC-95</td><td><code>git status</code> sau khi tạo <code>.env</code> và chạy game.</td><td><code>.env</code> và file <code>.db</code> không xuất hiện trong danh sách cần commit.</td><td>QT-80, QT-91</td><td></td></tr>
+        <tr><td class="id">TC-93</td><td>Đăng ký 2 người, chơi vài lượt; <code>docker compose down</code> rồi <code>up -d --build</code>.</td><td>Dữ liệu còn nguyên (volume <code>pgdata</code>). Sau <code>down -v</code> thì dữ liệu mất (đúng như QT-91).</td><td>QT-91</td><td></td></tr>
+        <tr><td class="id">TC-94</td><td>Đọc code máy chủ: tìm mọi câu SQL.</td><td>Tất cả dùng tham số <code>$1, $2…</code> trong <code>pool.query</code>, không có ghép chuỗi người dùng.</td><td>QT-75</td><td></td></tr>
+        <tr><td class="id">TC-95</td><td><code>git status</code> sau khi tạo <code>.env</code> và chạy game.</td><td><code>.env</code> không xuất hiện trong danh sách cần commit; <code>.env.example</code> thì có.</td><td>QT-80, QT-91</td><td></td></tr>
         <tr><td class="id">TC-96</td><td>Gửi <code>PUT /</code>, <code>POST /index.html</code>, <code>DELETE /api/players</code>; gửi <code>POST /api/players</code> với thân 20 KB.</td><td>Ba yêu cầu đầu vẫn trả 405 như cũ; thân quá lớn trả 413.</td><td>QT-74</td><td></td></tr>
         <tr><td class="id">TC-97</td><td>Chạy lại bộ “Chính” TC-01→TC-22 với người chơi đã đăng ký.</td><td>Mọi ca cũ vẫn đạt; riêng TC-41 thay bằng QT-90 (game cần máy chủ).</td><td>QĐ-12</td><td></td></tr>
       </tbody>

@@ -163,7 +163,7 @@
     <div class="table-wrap"><table>
       <thead><tr><th class="id">Mã</th><th>Câu hỏi</th><th>Quyết định</th></tr></thead>
       <tbody>
-        <tr><td class="id">QĐ-06</td><td>Dùng database nào?</td><td><strong>SQLite</strong> qua module <code>node:sqlite</code> có sẵn trong Node 22. Một file <code>.db</code> nằm trong Docker volume. Không thêm container, không thêm dependency.</td></tr>
+        <tr><td class="id">QĐ-06</td><td>Dùng database nào?</td><td><strong>PostgreSQL</strong> (<code>postgres:17-alpine</code>), là dịch vụ <code>db</code> trong Docker Compose, dữ liệu nằm trong volume <code>pgdata</code>. App kết nối bằng thư viện <code>pg</code>. <span class="tag new">Đổi 17/11/2026</span> Ban đầu chốt SQLite; đổi sang PostgreSQL theo yêu cầu khi viết code.</td></tr>
         <tr><td class="id">QĐ-07</td><td>Đăng ký bao lâu một lần? Có lưu điểm không?</td><td><strong>Đăng ký một lần</strong> trên mỗi trình duyệt. <strong>Mọi lượt chơi đều lưu</strong> lên máy chủ, gắn với người chơi.</td></tr>
         <tr><td class="id">QĐ-08</td><td>Đăng nhập admin thế nào?</td><td><strong>Một tài khoản</strong>, đặt bằng biến môi trường <code>ADMIN_USER</code> / <code>ADMIN_PASSWORD</code> trong file <code>.env</code> (không commit). Phiên lưu bằng cookie HttpOnly.</td></tr>
         <tr><td class="id">QĐ-09</td><td>Đăng ký bằng email đã có thì sao?</td><td>Dùng lại hồ sơ cũ, <strong>không ghi đè</strong> họ tên và số điện thoại đã lưu. Phản hồi giống hệt đăng ký mới để không lộ email nào đã có trong hệ thống.</td></tr>

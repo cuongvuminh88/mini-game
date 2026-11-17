@@ -188,9 +188,9 @@
         <tr><td class="id">QT-64</td><td>Đồng ý xử lý dữ liệu <span class="tag new">QĐ-10</span></td><td>Bắt buộc <code>consent: true</code>. Lưu thời điểm đồng ý vào <code>consent_at</code>. Thiếu hoặc khác <code>true</code> → từ chối.</td></tr>
         <tr><td class="id">QT-65</td><td>Email đã có <span class="tag new">QĐ-09</span></td><td>Không tạo bản ghi mới, không sửa họ tên / số điện thoại cũ. Trả về mã người chơi của bản ghi cũ với mã trạng thái và nội dung <strong>giống hệt</strong> lần đăng ký mới (201). So khớp email sau khi đã chuyển chữ thường.</td></tr>
         <tr><td class="id">QT-66</td><td>Mã người chơi</td><td>Mỗi người chơi có <code>token</code> ngẫu nhiên 128 bit (<code>crypto.randomBytes(16)</code>, dạng hex 32 ký tự), sinh lúc đăng ký. Đây là thứ duy nhất trình duyệt giữ để chứng minh “tôi là người chơi này”. Không bao giờ hiện trong trang admin hay file CSV.</td></tr>
-        <tr><td class="id">QT-67</td><td>Ghi nhớ trên trình duyệt</td><td>Lưu <code>localStorage</code> khoá <code>dap-chuot.player</code>, giá trị JSON <code>{"token": "…", "name": "Nguyễn Thị Lan"}</code>. Đọc/ghi bọc <code>try/catch</code> như QT-42: lỗi thì giữ trong bộ nhớ của phiên (tải lại trang sẽ phải đăng ký lại, QT-65 đảm bảo không sinh bản ghi trùng). Giá trị hỏng (không phải JSON, thiếu token) → coi như chưa đăng ký.</td></tr>
-        <tr><td class="id">QT-68</td><td>Kiểm tra lúc tải trang</td><td>Có token thì gọi <code>GET /api/players/me</code>. 200 → MH-01 với tên trả về. 404 → xoá <code>dap-chuot.player</code>, hiện MH-04. Lỗi mạng / 5xx → vẫn vào MH-01 bằng tên đã lưu (không bắt đăng ký lại chỉ vì mạng chập chờn).</td></tr>
-        <tr><td class="id">QT-69</td><td>“Không phải bạn?”</td><td>Xoá <code>dap-chuot.player</code> và kỷ lục <code>dap-chuot.highScore</code> trên trình duyệt (kỷ lục là của người trước), rồi hiện MH-04. Không gọi máy chủ.</td></tr>
+        <tr><td class="id">QT-67</td><td>Ghi nhớ trên trình duyệt</td><td>Lưu <code>localStorage</code> khoá <code>dap-sep.player</code>, giá trị JSON <code>{"token": "…", "name": "Nguyễn Thị Lan"}</code>. Đọc/ghi bọc <code>try/catch</code> như QT-42: lỗi thì giữ trong bộ nhớ của phiên (tải lại trang sẽ phải đăng ký lại, QT-65 đảm bảo không sinh bản ghi trùng). Giá trị hỏng (không phải JSON, thiếu token) → coi như chưa đăng ký.</td></tr>
+        <tr><td class="id">QT-68</td><td>Kiểm tra lúc tải trang</td><td>Có token thì gọi <code>GET /api/players/me</code>. 200 → MH-01 với tên trả về. 404 → xoá <code>dap-sep.player</code>, hiện MH-04. Lỗi mạng / 5xx → vẫn vào MH-01 bằng tên đã lưu (không bắt đăng ký lại chỉ vì mạng chập chờn).</td></tr>
+        <tr><td class="id">QT-69</td><td>“Không phải bạn?”</td><td>Xoá <code>dap-sep.player</code> và kỷ lục <code>dap-sep.highScore</code> trên trình duyệt (kỷ lục là của người trước), rồi hiện MH-04. Không gọi máy chủ.</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -198,37 +198,37 @@
 
 <section class="section alt" id="database">
   <div class="container">
-    <h2>Database <span class="tag new">QĐ-06</span></h2>
-    <p>SQLite qua <code>node:sqlite</code> (<code>DatabaseSync</code>) — có sẵn trong Node 22, không thêm dependency. File <code>/data/dap-sep.db</code> trong Docker volume <code>dap-sep-data</code>. Khi mở: bật <code>PRAGMA foreign_keys = ON</code>, <code>PRAGMA journal_mode = WAL</code>, và tự tạo bảng nếu chưa có.</p>
+    <h2>Database <span class="tag new">QĐ-06</span> <span class="tag new">PostgreSQL · đổi 17/11/2026</span></h2>
+    <p>PostgreSQL 17 (<code>postgres:17-alpine</code>) là dịch vụ <code>db</code> trong <code>compose.yaml</code>, dữ liệu trong volume <code>pgdata</code>; không mở cổng ra ngoài, chỉ app trong mạng Compose kết nối được. App dùng thư viện <code>pg</code> (node-postgres), đọc kết nối từ biến <code>PGHOST</code>, <code>PGDATABASE</code>, <code>PGUSER</code>, <code>PGPASSWORD</code>. Lúc khởi động, app tự tạo bảng nếu chưa có (code ở <code>lib/db.js</code>).</p>
 <pre>CREATE TABLE IF NOT EXISTS players (
-  id           INTEGER PRIMARY KEY,
-  token        TEXT    NOT NULL UNIQUE,              -- QT-66
-  full_name    TEXT    NOT NULL,                     -- QT-61
-  name_search  TEXT    NOT NULL,                     -- QT-84: chữ thường, bỏ dấu
-  email        TEXT    NOT NULL UNIQUE,              -- QT-62, đã chữ thường
-  phone        TEXT    NOT NULL,                     -- QT-63, 10 số
-  consent_at   TEXT    NOT NULL,                     -- QT-64, ISO 8601 UTC
-  created_at   TEXT    NOT NULL                      -- ISO 8601 UTC
+  id           BIGSERIAL   PRIMARY KEY,
+  token        TEXT        NOT NULL UNIQUE,          -- QT-66
+  full_name    TEXT        NOT NULL,                 -- QT-61
+  name_search  TEXT        NOT NULL,                 -- QT-84: chữ thường, bỏ dấu
+  email        TEXT        NOT NULL UNIQUE,          -- QT-62, đã chữ thường
+  phone        TEXT        NOT NULL,                 -- QT-63, 10 số
+  consent_at   TIMESTAMPTZ NOT NULL,                 -- QT-64
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS rounds (
-  id         INTEGER PRIMARY KEY,
-  player_id  INTEGER NOT NULL REFERENCES players(id) ON DELETE CASCADE,
-  score      INTEGER NOT NULL CHECK (score &gt;= 0),
-  hits       INTEGER NOT NULL CHECK (hits &gt;= 0),
-  spawned    INTEGER NOT NULL CHECK (spawned &gt;= hits),
-  played_at  TEXT    NOT NULL                        -- ISO 8601 UTC
+  id         BIGSERIAL   PRIMARY KEY,
+  player_id  BIGINT      NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+  score      INTEGER     NOT NULL CHECK (score &gt;= 0),
+  hits       INTEGER     NOT NULL CHECK (hits &gt;= 0),
+  spawned    INTEGER     NOT NULL CHECK (spawned &gt;= hits),
+  played_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_rounds_player  ON rounds(player_id);
-CREATE INDEX IF NOT EXISTS idx_players_created ON players(created_at);</pre>
+CREATE INDEX IF NOT EXISTS idx_rounds_player   ON rounds(player_id);
+CREATE INDEX IF NOT EXISTS idx_players_created ON players(created_at DESC);</pre>
     <div class="table-wrap"><table>
       <thead><tr><th class="id">Mã</th><th>Quy tắc</th></tr></thead>
       <tbody>
-        <tr><td class="id">QT-75</td><td>Mọi câu SQL dùng tham số (<code>prepare(...).run(?, ?)</code>), không bao giờ ghép chuỗi người dùng vào SQL.</td></tr>
-        <tr><td class="id">QT-76</td><td>Thời gian lưu dạng ISO 8601 UTC (<code>new Date().toISOString()</code>). Chỉ đổi sang giờ Việt Nam (<code>Asia/Ho_Chi_Minh</code>) khi hiển thị và khi xuất CSV.</td></tr>
+        <tr><td class="id">QT-75</td><td>Mọi câu SQL dùng tham số (<code>pool.query(sql, [$1, $2…])</code>), không bao giờ ghép chuỗi người dùng vào SQL. Đăng ký dùng <code>INSERT … ON CONFLICT (email) DO NOTHING</code> để chống trùng email ngay trong database (QT-65), kể cả khi hai yêu cầu đến cùng lúc.</td></tr>
+        <tr><td class="id">QT-76</td><td>Thời gian lưu kiểu <code>TIMESTAMPTZ</code> (giờ do database đặt bằng <code>now()</code>); API trả về dạng ISO 8601 UTC. Chỉ đổi sang giờ Việt Nam (<code>Asia/Ho_Chi_Minh</code>) khi hiển thị và khi xuất CSV.</td></tr>
         <tr><td class="id">QT-77</td><td>“Số lượt”, “Điểm cao nhất”, “Lần chơi cuối” không lưu riêng mà tính bằng <code>COUNT</code> / <code>MAX(score)</code> / <code>MAX(played_at)</code> trên bảng <code>rounds</code>.</td></tr>
-        <tr><td class="id">QT-78</td><td>Không mở được file database lúc khởi động (thiếu quyền ghi, ổ đầy) → ghi lỗi rõ ràng ra log và thoát với mã khác 0, để Docker báo container lỗi thay vì chạy nửa vời.</td></tr>
+        <tr><td class="id">QT-78</td><td>App chỉ khởi động sau khi <code>db</code> báo healthy (<code>pg_isready</code>), và tự thử kết nối lại tối đa 15 lần, mỗi lần cách 2 giây. Vẫn không kết nối được → ghi lỗi rõ ràng ra log và thoát với mã khác 0, để Docker báo container lỗi thay vì chạy nửa vời.</td></tr>
       </tbody>
     </table></div>
   </div>
@@ -244,7 +244,7 @@ CREATE INDEX IF NOT EXISTS idx_players_created ON players(created_at);</pre>
         <tr><td><code>POST /api/players</code></td><td>Người chơi</td><td><code>{fullName, email, phone, consent}</code></td><td>201 <code>{token, name}</code> · 400 · 429</td></tr>
         <tr><td><code>GET /api/players/me</code></td><td>Người chơi</td><td>Header <code>Authorization: Bearer &lt;token&gt;</code></td><td>200 <code>{name}</code> · 404</td></tr>
         <tr><td><code>POST /api/rounds</code></td><td>Người chơi</td><td>Header như trên · <code>{score, hits, spawned}</code></td><td>201 · 400 · 404 · 429</td></tr>
-        <tr><td><code>POST /admin/login</code></td><td>Admin</td><td><code>{username, password}</code></td><td>204 + cookie · 401 · 429 · 503</td></tr>
+        <tr><td><code>POST /admin/login</code></td><td>Admin</td><td><code>{username, password}</code></td><td>204 + cookie · 401 · 403 · 429 · 503</td></tr>
         <tr><td><code>POST /admin/logout</code></td><td>Admin</td><td>—</td><td>204, xoá cookie</td></tr>
         <tr><td><code>GET /api/admin/players?q=&amp;page=</code></td><td>Admin</td><td>—</td><td>200 <code>{total, page, pages, items[]}</code> · 401</td></tr>
         <tr><td><code>DELETE /api/admin/players/:id</code></td><td>Admin</td><td>—</td><td>204 · 404 · 401</td></tr>
@@ -270,7 +270,7 @@ CREATE INDEX IF NOT EXISTS idx_players_created ON players(created_at);</pre>
     <div class="table-wrap"><table>
       <thead><tr><th class="id">Mã</th><th>Chủ đề</th><th>Quy tắc</th></tr></thead>
       <tbody>
-        <tr><td class="id">QT-80</td><td>Tài khoản</td><td>Đọc <code>ADMIN_USER</code> và <code>ADMIN_PASSWORD</code> từ biến môi trường lúc khởi động (truyền qua <code>env_file: .env</code> trong <code>compose.yaml</code>; <code>.env</code> đã nằm trong <code>.gitignore</code>). Thiếu một trong hai, hoặc mật khẩu ngắn hơn 12 ký tự → trang admin tắt (503) và ghi cảnh báo ra log; phần game vẫn chạy. So sánh bằng <code>crypto.timingSafeEqual</code> trên mã băm SHA-256 của hai bên (độ dài bằng nhau, thời gian so sánh không lộ thông tin).</td></tr>
+        <tr><td class="id">QT-80</td><td>Tài khoản</td><td>Đọc <code>ADMIN_USER</code> và <code>ADMIN_PASSWORD</code> từ biến môi trường lúc khởi động (<code>compose.yaml</code> lấy giá trị từ file <code>.env</code> và truyền vào app qua <code>environment</code>; <code>.env</code> nằm trong <code>.gitignore</code>, mẫu ở <code>.env.example</code>). Thiếu một trong hai, hoặc mật khẩu ngắn hơn 12 ký tự → trang admin tắt (503) và ghi cảnh báo ra log; phần game vẫn chạy. So sánh bằng <code>crypto.timingSafeEqual</code> trên mã băm SHA-256 của hai bên (độ dài bằng nhau, thời gian so sánh không lộ thông tin).</td></tr>
         <tr><td class="id">QT-81</td><td>Chống dò mật khẩu</td><td>Sai 5 lần trong 15 phút từ cùng một IP → khoá đăng nhập từ IP đó 15 phút (429), kể cả khi lần sau nhập đúng. Đăng nhập đúng thì xoá bộ đếm của IP đó.</td></tr>
         <tr><td class="id">QT-82</td><td>Phiên</td><td>Đăng nhập đúng → sinh mã phiên ngẫu nhiên 256 bit, giữ trong bộ nhớ máy chủ kèm thời điểm hết hạn (8 giờ). Cookie <code>admin_session</code>: <code>HttpOnly; SameSite=Strict; Path=/; Max-Age=28800</code>, thêm <code>Secure</code> khi chạy sau HTTPS. Khởi động lại máy chủ thì mọi phiên mất, admin đăng nhập lại — chấp nhận được.</td></tr>
         <tr><td class="id">QT-83</td><td>Chống giả mạo yêu cầu</td><td>Với <code>POST</code>/<code>DELETE</code> của admin: ngoài <code>SameSite=Strict</code>, kiểm tra header <code>Origin</code> (hoặc <code>Referer</code> nếu thiếu) phải trùng địa chỉ trang; sai → 403.</td></tr>
@@ -298,9 +298,9 @@ CREATE INDEX IF NOT EXISTS idx_players_created ON players(created_at);</pre>
       <thead><tr><th class="id">Mã</th><th>Quy tắc</th></tr></thead>
       <tbody>
         <tr><td class="id">QT-90</td><td><strong>Thay thế QT-56</strong> cho bản có đăng ký <span class="tag new">QĐ-12</span>: game phải chạy qua máy chủ (<code>http://localhost:3000</code> hoặc tên miền thật). Mở bằng <code>file://</code> hoặc máy chủ không trả lời khi đăng ký → MH-04 hiện lỗi chung “Không kết nối được máy chủ”, không vào được game.</td></tr>
-        <tr><td class="id">QT-91</td><td><code>compose.yaml</code> thêm volume có tên <code>dap-sep-data</code> gắn vào <code>/data</code>, và <code>env_file: .env</code>. Dockerfile tạo <code>/data</code> thuộc user <code>node</code>. <code>docker compose down</code> không xoá dữ liệu; chỉ <code>down -v</code> mới xoá.</td></tr>
+        <tr><td class="id">QT-91</td><td><code>compose.yaml</code> có hai dịch vụ: <code>app</code> và <code>db</code>, cùng volume <code>pgdata</code> gắn vào <code>/var/lib/postgresql/data</code>. <code>POSTGRES_DB</code>, <code>POSTGRES_USER</code>, <code>POSTGRES_PASSWORD</code>, <code>ADMIN_USER</code>, <code>ADMIN_PASSWORD</code> đặt trong <code>.env</code>; thiếu biến database thì <code>docker compose</code> báo lỗi ngay. <code>docker compose down</code> không xoá dữ liệu; chỉ <code>down -v</code> mới xoá.</td></tr>
         <tr><td class="id">QT-92</td><td>Kỷ lục (QT-40→QT-43) <strong>giữ nguyên</strong>: vẫn tính và lưu trên trình duyệt. Điểm cao nhất trên trang admin tính riêng từ bảng <code>rounds</code> (QT-77), hai con số có thể khác nhau (ví dụ khi lưu lượt thất bại).</td></tr>
-        <tr><td class="id">QT-93</td><td><code>node:sqlite</code> cần Node ≥ 22.13 để chạy không cần cờ; ảnh <code>node:22-alpine</code> hiện tại đáp ứng. Sửa <code>"engines"</code> trong <code>package.json</code> thành <code>"node": "&gt;=22.13"</code>. Module này vẫn ở mức thử nghiệm nên in một cảnh báo lúc khởi động; chấp nhận được.</td></tr>
+        <tr><td class="id">QT-93</td><td>Dự án có dependency đầu tiên: <code>pg</code>, khoá phiên bản bằng <code>package-lock.json</code>. Dockerfile cài bằng <code>npm ci --omit=dev</code> trước khi chép code để tận dụng cache. Quy tắc kiểm tra dữ liệu nằm ở <code>shared/validate.js</code>, dùng chung cho máy chủ và trình duyệt.</td></tr>
       </tbody>
     </table></div>
   </div>
