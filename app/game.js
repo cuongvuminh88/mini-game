@@ -203,6 +203,47 @@
     }
   }
 
+  // Một nốt nhạc ngắn: tấn công nhanh, ngân rồi tắt dần
+  function playNote(out, type, freq, start, dur, peak) {
+    const osc = audioCtx.createOscillator();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, start);
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0.0001, start);
+    g.gain.exponentialRampToValueAtTime(peak, start + 0.015);
+    g.gain.setValueAtTime(peak, start + dur * 0.6);
+    g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+    osc.connect(g).connect(out);
+    osc.start(start);
+    osc.stop(start + dur + 0.02);
+  }
+
+  // Nhạc “victory” khi hiện bảng điểm: đô–mi–sol–đô rồi hợp âm Đô trưởng ngân dài
+  function playVictorySound() {
+    if (!audioCtx || audioCtx.state !== 'running') return;
+    try {
+      const t = audioCtx.currentTime + 0.05;
+      const out = audioCtx.createGain();
+      out.gain.value = 0.35;
+      out.connect(audioCtx.destination);
+
+      const C5 = 523.25, E5 = 659.25, G5 = 783.99, C6 = 1046.5;
+      const step = 0.12;
+      [C5, E5, G5].forEach(function (f, i) {
+        playNote(out, 'square', f, t + i * step, 0.11, 0.25);
+      });
+      playNote(out, 'square', C6, t + 3 * step, 0.22, 0.25);
+      playNote(out, 'square', G5, t + 3 * step + 0.24, 0.1, 0.22);
+      const chordAt = t + 3 * step + 0.36;
+      [C5, E5, G5, C6].forEach(function (f) {
+        playNote(out, 'triangle', f, chordAt, 0.9, 0.3);
+      });
+      playNote(out, 'square', C6, chordAt, 0.9, 0.12);
+    } catch (e) {
+      /* bỏ qua lỗi âm thanh */
+    }
+  }
+
   // Tiếng “bốp”: tiếng gõ ngắn (nhiễu lọc) + tiếng “boing” trượt xuống
   function playHitSound() {
     if (!audioCtx || audioCtx.state !== 'running') return;
@@ -393,6 +434,7 @@
     renderEnd();
     lockReplay();
     renderPhase();
+    playVictorySound();
     el.btnReplay.focus({ preventScroll: true });
   }
 
