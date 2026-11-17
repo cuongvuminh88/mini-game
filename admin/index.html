@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Người chơi — Quản trị Đập Sếp</title>
+<link rel="stylesheet" href="/design/tokens.css">
+<link rel="stylesheet" href="/admin/admin.css">
+<script src="/admin/admin.js" defer></script>
+</head>
+<body>
+<main class="card admin-card">
+  <!-- MH-11 · Danh sách người chơi (CN-18…CN-22) -->
+  <header class="bar">
+    <h1>Người chơi <span id="total" class="num"></span></h1>
+    <button id="btn-logout" class="btn btn-ghost" type="button">Đăng xuất</button>
+  </header>
+
+  <div class="bar tools">
+    <label class="visually-hidden" for="search">Tìm người chơi</label>
+    <input id="search" type="search" maxlength="100" autocomplete="off"
+           placeholder="Tìm theo tên, email, số điện thoại…">
+    <a id="btn-csv" class="btn btn-primary" href="/api/admin/players.csv" download>Xuất CSV</a>
+  </div>
+
+  <p id="status" class="muted" role="status" aria-live="polite"></p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Họ tên</th>
+          <th scope="col">Email</th>
+          <th scope="col">Điện thoại</th>
+          <th scope="col">Đăng ký</th>
+          <th scope="col" class="n">Lượt</th>
+          <th scope="col" class="n">Cao nhất</th>
+          <th scope="col">Lần chơi cuối</th>
+          <th scope="col"><span class="visually-hidden">Thao tác</span></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <p id="empty" class="empty" hidden></p>
+
+  <nav class="pager" aria-label="Phân trang">
+    <button id="btn-prev" class="btn btn-ghost" type="button">‹ Trước</button>
+    <span id="page-info" class="num"></span>
+    <button id="btn-next" class="btn btn-ghost" type="button">Sau ›</button>
+  </nav>
+</main>
+
+<!-- MH-12 · Hộp xác nhận xoá (CN-20) -->
+<dialog id="confirm" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+  <h2 id="confirm-title">Xoá người chơi?</h2>
+  <p id="confirm-text"></p>
+  <p id="confirm-error" class="form-error" role="alert"></p>
+  <div class="dialog-actions">
+    <button id="btn-cancel" class="btn btn-ghost" type="button">Huỷ</button>
+    <button id="btn-confirm" class="btn btn-danger" type="button">Xoá</button>
+  </div>
+</dialog>
+</body>
+</html>

@@ -23,7 +23,9 @@
     ANIM_MS: 150,             // thò lên / thụt xuống
     HIT_SHOW_MS: 150,         // giữ hình “bị đập” trước khi thụt
     REPLAY_LOCK_MS: 500,      // khóa nút Chơi lại sau khi kết thúc
-    STORAGE_KEY: "dap-sep.highScore"
+    STORAGE_KEY: "dap-sep.highScore",
+    PLAYER_KEY: "dap-sep.player",   // QT-67: { token, name }
+    SAVE_TIMEOUT_MS: 5000           // QT-72: chờ lưu kết quả lượt tối đa 5 giây
   }));
 
   function applyTestOverrides(defaults) {
@@ -57,7 +59,7 @@
   /* ---------------------------------------------------------------------
      Trạng thái
      --------------------------------------------------------------------- */
-  const PHASE = Object.freeze({ START: 'START', PLAYING: 'PLAYING', END: 'END' });
+  const PHASE = Object.freeze({ REGISTER: 'REGISTER', START: 'START', PLAYING: 'PLAYING', END: 'END' });
   const MOLE = Object.freeze({ UP: 'UP', HIT: 'HIT', LEAVING: 'LEAVING' });
 
   const state = {
@@ -72,6 +74,9 @@
   };
 
   let highScore = readHighScore();   // QT-41: đọc một lần khi tải trang
+  let memoryPlayer = null;           // dự phòng khi localStorage bị chặn (QT-67)
+  let player = readPlayer();         // QT-67: { token, name } | null
+  let registering = false;
   let moleSeq = 0;
   let rafId = 0;
   let shownSeconds = -1;
@@ -99,6 +104,16 @@
     endNewRecord: $('end-new-record'),
     endBest: $('end-best'),
     btnReplay: $('btn-replay'),
+    endSaveStatus: $('end-save-status'),
+    startName: $('start-name'),
+    btnSwitchPlayer: $('btn-switch-player'),
+    registerForm: $('register-form'),
+    regName: $('reg-name'),
+    regEmail: $('reg-email'),
+    regPhone: $('reg-phone'),
+    regConsent: $('reg-consent'),
+    regFormError: $('reg-form-error'),
+    btnRegister: $('btn-register'),
     announcer: $('announcer'),
     cellTemplate: $('cell-template')
   };
@@ -344,6 +359,202 @@
   }
 
   /* ---------------------------------------------------------------------
+     Người chơi (CN-13…CN-16, QT-65…QT-69, QT-72)
+     --------------------------------------------------------------------- */
+  function readPlayer() {
+    try {
+      const raw = window.localStorage.getItem(CONFIG.PLAYER_KEY);
+      if (raw === null) return memoryPlayer;
+      const p = JSON.parse(raw);
+      if (p && typeof p.token === 'string' && /^[0-9a-f]{32}$/.test(p.token) && typeof p.name === 'string') {
+        return { token: p.token, name: p.name };
+      }
+      return null;
+    } catch (e) {
+      return memoryPlayer;
+    }
+  }
+
+  function savePlayer(p) {
+    memoryPlayer = p;
+    try { window.localStorage.setItem(CONFIG.PLAYER_KEY, JSON.stringify(p)); } catch (e) { /* QT-67 */ }
+  }
+
+  function forgetPlayer() {
+    memoryPlayer = null;
+    player = null;
+    try { window.localStorage.removeItem(CONFIG.PLAYER_KEY); } catch (e) { /* bỏ qua */ }
+  }
+
+  function apiFetch(path, options) {
+    const opts = Object.assign({ headers: {} }, options);
+    if (opts.body !== undefined) opts.headers['Content-Type'] = 'application/json';
+    if (player) opts.headers.Authorization = 'Bearer ' + player.token;
+    return fetch(path, opts);
+  }
+
+  // QT-68: kiểm tra token còn hiệu lực; chỉ 404 mới bắt đăng ký lại
+  function verifyPlayer() {
+    if (!player) return;
+    const token = player.token;
+    apiFetch('/api/players/me').then(function (res) {
+      if (!player || player.token !== token) return;
+      if (res.status === 404) { onPlayerGone(); return; }
+      if (!res.ok) return;
+      return res.json().then(function (data) {
+        if (data && typeof data.name === 'string' && player && player.token === token) {
+          player = { token: token, name: data.name };
+          savePlayer(player);
+          renderStart();
+        }
+      });
+    }).catch(function () { /* mạng lỗi: vẫn cho chơi bằng tên đã lưu */ });
+  }
+
+  // Người chơi đã bị admin xoá → quên và quay về đăng ký (chỉ khi không đang chơi)
+  function onPlayerGone() {
+    forgetPlayer();
+    if (state.phase === PHASE.START) showRegister();
+  }
+
+  // QT-72: gửi nền, lỗi chỉ hiện dòng nhắc nhỏ, không chặn “Chơi lại”
+  function submitRound(score, spawned, rid) {
+    if (!player) return;
+    const token = player.token;
+    const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, CONFIG.SAVE_TIMEOUT_MS);
+    const showFailed = function () {
+      if (state.roundId === rid && state.phase === PHASE.END) el.endSaveStatus.hidden = false;
+    };
+    apiFetch('/api/rounds', {
+      method: 'POST',
+      body: JSON.stringify({ score: score, hits: score, spawned: spawned }),
+      signal: ctrl ? ctrl.signal : undefined
+    }).then(function (res) {
+      clearTimeout(timer);
+      if (res.status === 404) {
+        if (player && player.token === token) forgetPlayer();
+        showFailed();
+      } else if (!res.ok) {
+        showFailed();
+      }
+    }).catch(function () {
+      clearTimeout(timer);
+      showFailed();
+    });
+  }
+
+  /* ----- Form đăng ký (MH-04) ----- */
+  const FIELDS = [
+    { key: 'fullName', input: function () { return el.regName; } },
+    { key: 'email', input: function () { return el.regEmail; } },
+    { key: 'phone', input: function () { return el.regPhone; } },
+    { key: 'consent', input: function () { return el.regConsent; } }
+  ];
+
+  function formValues() {
+    return {
+      fullName: el.regName.value,
+      email: el.regEmail.value,
+      phone: el.regPhone.value,
+      consent: el.regConsent.checked
+    };
+  }
+
+  function setFieldError(input, message) {
+    const err = document.getElementById(input.getAttribute('aria-describedby'));
+    if (message) {
+      input.setAttribute('aria-invalid', 'true');
+      err.textContent = message;
+      err.hidden = false;
+    } else {
+      input.removeAttribute('aria-invalid');
+      err.textContent = '';
+      err.hidden = true;
+    }
+  }
+
+  function checkField(key) {
+    const field = FIELDS.find(function (f) { return f.key === key; });
+    const result = window.Validate[key](formValues()[key]);
+    setFieldError(field.input(), result.error || '');
+    return !result.error;
+  }
+
+  function showErrors(errors) {
+    let first = null;
+    FIELDS.forEach(function (f) {
+      const msg = errors[f.key] || '';
+      setFieldError(f.input(), msg);
+      if (msg && !first) first = f.input();
+    });
+    if (first) first.focus();
+  }
+
+  function setRegistering(busy) {
+    registering = busy;
+    el.btnRegister.setAttribute('aria-disabled', busy ? 'true' : 'false');
+    el.btnRegister.textContent = busy ? 'Đang gửi…' : 'Đăng ký & chơi';
+  }
+
+  function onRegisterSubmit(event) {
+    event.preventDefault();
+    if (registering) return;                                               // chống gửi 2 lần
+    el.regFormError.textContent = '';
+    const check = window.Validate.registration(formValues());
+    if (!check.ok) { showErrors(check.errors); return; }
+
+    setRegistering(true);
+    fetch('/api/players', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formValues())
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (data) {
+        if (res.status === 201 && data.token) {
+          player = { token: data.token, name: data.name };
+          savePlayer(player);
+          el.registerForm.reset();
+          showStart();
+        } else if (res.status === 400 && data.errors) {
+          showErrors(data.errors);
+        } else if (res.status === 429) {
+          el.regFormError.textContent = data.error || 'Bạn thao tác quá nhanh, vui lòng thử lại sau ít phút.';
+        } else {
+          el.regFormError.textContent = 'Không kết nối được máy chủ. Vui lòng thử lại.';
+        }
+      });
+    }).catch(function () {
+      el.regFormError.textContent = 'Không kết nối được máy chủ. Vui lòng thử lại.';
+    }).then(function () {
+      setRegistering(false);
+    });
+  }
+
+  // CN-15, QT-69: quên người chơi và kỷ lục trên trình duyệt này
+  function onSwitchPlayer() {
+    forgetPlayer();
+    highScore = 0;
+    try { window.localStorage.removeItem(CONFIG.STORAGE_KEY); } catch (e) { /* bỏ qua */ }
+    showRegister();
+  }
+
+  function showRegister() {
+    state.phase = PHASE.REGISTER;
+    el.regFormError.textContent = '';
+    FIELDS.forEach(function (f) { setFieldError(f.input(), ''); });
+    renderPhase();
+    el.regName.focus({ preventScroll: true });
+  }
+
+  function showStart() {
+    state.phase = PHASE.START;
+    renderStart();
+    renderPhase();
+    el.btnStart.focus({ preventScroll: true });
+  }
+
+  /* ---------------------------------------------------------------------
      Dựng lưới (QT-03)
      --------------------------------------------------------------------- */
   function buildGrid() {
@@ -399,6 +610,7 @@
   function renderStart() {
     el.ruleSeconds.textContent = formatNumber(CONFIG.ROUND_MS / MS_PER_SECOND);
     el.startBest.textContent = formatNumber(highScore);
+    el.startName.textContent = player ? window.Validate.callName(player.name) : '';
   }
 
   function renderEnd() {
@@ -424,6 +636,8 @@
   function startRound() {
     unlockAudio();
     if (state.phase === PHASE.PLAYING) return;                              // QT-11
+    if (state.phase === PHASE.REGISTER) return;                             // CN-13: phải đăng ký trước
+    if (!player) { showRegister(); return; }                               // bị xoá giữa chừng (QT-72)
     if (state.phase === PHASE.END && now() < replayLockedUntil) return;     // QT-53
 
     playStartSound();
@@ -473,6 +687,8 @@
     }
 
     state.phase = PHASE.END;
+    el.endSaveStatus.hidden = true;
+    submitRound(state.score, state.spawned, state.roundId);               // CN-16, QT-72
     renderEnd();
     lockReplay();
     renderPhase();
@@ -588,12 +804,23 @@
   function init() {
     buildGrid();
     setupHaptics();
-    renderStart();
-    renderPhase();
     el.btnStart.addEventListener('click', startRound);
     el.btnReplay.addEventListener('click', startRound);
+    el.btnSwitchPlayer.addEventListener('click', onSwitchPlayer);
+    el.registerForm.addEventListener('submit', onRegisterSubmit);
+    FIELDS.forEach(function (f) {
+      const input = f.input();
+      // Kiểm tra khi rời ô; khi đang có lỗi thì kiểm tra lại ngay lúc sửa
+      input.addEventListener(input.type === 'checkbox' ? 'change' : 'blur', function () {
+        if (input.type === 'checkbox' || input.value.trim() !== '') checkField(f.key);
+      });
+      input.addEventListener('input', function () {
+        if (input.getAttribute('aria-invalid') === 'true') checkField(f.key);
+      });
+    });
     document.addEventListener('visibilitychange', onVisibilityChange);
-    el.btnStart.focus({ preventScroll: true });
+    if (player) { showStart(); verifyPlayer(); }                           // CN-14
+    else showRegister();                                                   // CN-13
   }
 
   init();

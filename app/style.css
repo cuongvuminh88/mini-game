@@ -477,3 +477,68 @@ body {
   .cell.is-flash { animation: none; }
   .plus.is-showing { animation: plus-static var(--duration-slow) linear forwards; }
 }
+
+/* ----- MH-04 · Đăng ký người chơi (CN-13) ------------------------------ */
+.screen-register { width: min(100%, 440px); }
+.screen-register .title { margin-top: var(--space-2); }
+
+.form { width: 100%; text-align: left; }
+/* Vùng game tắt chọn chữ; ô nhập phải chọn/sửa được */
+.form input { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+
+.field { margin: 0 0 var(--space-4); }
+.field label {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-small-size);
+  line-height: var(--text-small-line);
+  font-weight: var(--font-weight-semibold);
+}
+.field input[type="text"],
+.field input[type="email"],
+.field input[type="tel"] {
+  width: 100%;
+  height: var(--input-height);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-size: max(16px, var(--text-body-size)); /* ≥16px: iOS không tự phóng to khi focus */
+}
+.field input:focus { outline: none; border-color: var(--color-accent); box-shadow: var(--shadow-focus); }
+.field input[aria-invalid="true"] { border-color: var(--color-danger); }
+
+.field-check { display: grid; grid-template-columns: auto 1fr; gap: var(--space-1) var(--space-2); align-items: start; }
+.field-check input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--color-accent); }
+.field-check label { margin: 0; font-weight: var(--font-weight-regular); color: var(--color-text-secondary); }
+.field-check .field-error { grid-column: 2; }
+
+.field-error, .form-error {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-small-size);
+  line-height: var(--text-small-line);
+  color: var(--color-danger);
+}
+.field-error[hidden] { display: none; }
+.form-error:empty { display: none; }
+
+.consent-details { margin: calc(-1 * var(--space-2)) 0 var(--space-4); font-size: var(--text-small-size); color: var(--color-text-secondary); }
+.consent-details summary { cursor: pointer; color: var(--color-link); width: max-content; }
+.consent-details p { margin: var(--space-2) 0 0; }
+
+.form .btn { width: 100%; }
+
+/* ----- MH-01 · Lời chào + đổi người chơi (CN-14, CN-15) --------------- */
+.greeting { margin: 0 0 var(--space-3); color: var(--color-text-secondary); }
+.link-btn {
+  padding: 0; border: 0; background: none;
+  color: var(--color-link); font: inherit; text-decoration: underline; cursor: pointer;
+}
+.link-btn:focus { outline: none; }
+.link-btn:focus-visible { border-radius: var(--radius-xs); box-shadow: var(--shadow-focus); }
+
+/* ----- MH-03 · Lưu kết quả thất bại (CN-16) ---------------------------- */
+.save-status { margin: 0 0 var(--space-2); font-size: var(--text-small-size); color: var(--color-text-tertiary); }
+.save-status[hidden] { display: none; }

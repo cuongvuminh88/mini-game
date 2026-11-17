@@ -6,6 +6,7 @@
 <title>Đập Sếp</title>
 <link rel="stylesheet" href="../design/tokens.css">
 <link rel="stylesheet" href="style.css">
+<script src="../shared/validate.js" defer></script>
 <script src="game.js" defer></script>
 </head>
 <body>
@@ -100,13 +101,53 @@
 
 <main class="app">
 
+  <!-- MH-04 · Đăng ký (CN-13) -->
+  <section class="screen screen-register" data-phase="REGISTER" aria-labelledby="register-title" hidden>
+    <h1 id="register-title" class="title">Đăng ký để chơi</h1>
+    <p class="lead">Nhập thông tin một lần, lần sau vào chơi ngay.</p>
+    <form id="register-form" class="form" novalidate>
+      <div class="field">
+        <label for="reg-name">Họ tên</label>
+        <input id="reg-name" name="fullName" type="text" autocomplete="name" maxlength="120"
+               aria-describedby="reg-name-error">
+        <p id="reg-name-error" class="field-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="reg-email">Email</label>
+        <input id="reg-email" name="email" type="email" autocomplete="email" inputmode="email"
+               maxlength="254" aria-describedby="reg-email-error">
+        <p id="reg-email-error" class="field-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="reg-phone">Số điện thoại</label>
+        <input id="reg-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel"
+               maxlength="20" aria-describedby="reg-phone-error">
+        <p id="reg-phone-error" class="field-error" hidden></p>
+      </div>
+      <div class="field field-check">
+        <input id="reg-consent" name="consent" type="checkbox" aria-describedby="reg-consent-error">
+        <label for="reg-consent">Tôi đồng ý cho lưu họ tên, email, số điện thoại để quản lý người chơi.</label>
+        <p id="reg-consent-error" class="field-error" hidden></p>
+      </div>
+      <details class="consent-details">
+        <summary>Chi tiết</summary>
+        <p>Chúng tôi lưu họ tên, email, số điện thoại và kết quả các lượt chơi của bạn để quản lý người chơi.
+          Chỉ quản trị viên của game xem được. Muốn xoá dữ liệu, hãy liên hệ ban tổ chức để được xoá hẳn.</p>
+      </details>
+      <p id="reg-form-error" class="form-error" role="alert"></p>
+      <button id="btn-register" class="btn btn-primary btn-lg" type="submit">Đăng ký &amp; chơi</button>
+    </form>
+  </section>
+
   <!-- MH-01 · Bắt đầu -->
-  <section class="screen screen-start" data-phase="START" aria-labelledby="start-title">
+  <section class="screen screen-start" data-phase="START" aria-labelledby="start-title" hidden>
     <svg class="start-art" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
       <g clip-path="url(#mole-clip)"><use href="#sym-mole"/></g>
       <use href="#sym-desk"/>
     </svg>
     <h1 id="start-title" class="title">Đập Sếp</h1>
+    <p class="greeting">Xin chào, <strong id="start-name"></strong> ·
+      <button id="btn-switch-player" class="link-btn" type="button">Không phải bạn?</button></p>
     <p class="lead">Đập trúng sếp để ghi điểm.<br>Bạn có <span id="rule-seconds"></span> giây!</p>
     <p class="body-text">Kỷ lục: <span id="start-best" class="num"></span></p>
     <button id="btn-start" class="btn btn-primary btn-lg" type="button">Bắt đầu</button>
@@ -130,6 +171,7 @@
     <p class="body-text">Trúng <span id="end-hits" class="num"></span> / <span id="end-spawned" class="num"></span> lần sếp ló mặt</p>
     <p id="end-new-record" class="badge-new" hidden>Kỷ lục mới!</p>
     <p class="body-text">Kỷ lục: <span id="end-best" class="num"></span></p>
+    <p id="end-save-status" class="save-status" hidden>Chưa lưu được kết quả lượt này.</p>
     <button id="btn-replay" class="btn btn-primary btn-lg" type="button">Chơi lại</button>
   </section>
 
