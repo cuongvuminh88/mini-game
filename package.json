@@ -1,8 +1,8 @@
 {
-  "name": "dap-chuot",
+  "name": "dap-sep",
   "version": "1.0.0",
   "private": true,
-  "description": "Game Đập Chuột chạy trên trình duyệt, phục vụ bởi một server Node.js nhỏ",
+  "description": "Game Đập Sếp chạy trên trình duyệt, phục vụ bởi một server Node.js nhỏ",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

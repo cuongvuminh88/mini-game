@@ -1,6 +1,6 @@
-# Đập Chuột
+# Đập Sếp
 
-Game Đập Chuột chạy trên trình duyệt.
+Game Đập Sếp chạy trên trình duyệt.
 
 - `app/`: code game (HTML, CSS, JS)
 - `design/`: design system (`tokens.css` và trang xem trước)

@@ -1,5 +1,5 @@
 /* =========================================================================
-   game.js — Đập Chuột
+   game.js — Đập Sếp
    Script thường (không dùng type="module") để mở trực tiếp bằng file://.
    ========================================================================= */
 (function () {
@@ -13,17 +13,17 @@
     GRID_ROWS: 3,
     GRID_COLS: 3,
     ROUND_MS: 30000,          // thời gian một lượt
-    MOLE_UP_MIN_MS: 600,      // chuột hiện ngắn nhất
-    MOLE_UP_MAX_MS: 1200,     // chuột hiện lâu nhất
+    MOLE_UP_MIN_MS: 600,      // sếp hiện ngắn nhất
+    MOLE_UP_MAX_MS: 1200,     // sếp hiện lâu nhất
     GAP_MIN_MS: 200,          // nghỉ ngắn nhất giữa hai con
     GAP_MAX_MS: 500,          // nghỉ lâu nhất giữa hai con
-    MAX_MOLES: 1,             // số chuột tối đa cùng lúc
+    MAX_MOLES: 1,             // số sếp tối đa cùng lúc
     POINTS_PER_HIT: 1,
     WARNING_AT_S: 5,          // đổi màu đồng hồ khi còn ≤ 5 giây
     ANIM_MS: 150,             // thò lên / thụt xuống
     HIT_SHOW_MS: 150,         // giữ hình “bị đập” trước khi thụt
     REPLAY_LOCK_MS: 500,      // khóa nút Chơi lại sau khi kết thúc
-    STORAGE_KEY: "dap-chuot.highScore"
+    STORAGE_KEY: "dap-sep.highScore"
   }));
 
   function applyTestOverrides(defaults) {
@@ -230,7 +230,7 @@
     const parts = [
       'Hết giờ!',
       'Điểm ' + state.score + '.',
-      'Trúng ' + state.score + ' / ' + state.spawned + ' con chuột.'
+      'Trúng ' + state.score + ' / ' + state.spawned + ' lần sếp ló mặt.'
     ];
     if (state.isNewRecord) parts.push('Kỷ lục mới!');
     parts.push('Kỷ lục: ' + highScore + '.');

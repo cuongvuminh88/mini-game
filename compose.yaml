@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    image: dap-chuot:latest
+    image: dap-sep:latest
     ports:
       - "3000:3000"
     environment:

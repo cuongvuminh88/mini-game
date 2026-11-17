@@ -1,4 +1,4 @@
-// Server tĩnh nhỏ cho game Đập Chuột — chỉ dùng module có sẵn của Node.js.
+// Server tĩnh nhỏ cho game Đập Sếp — chỉ dùng module có sẵn của Node.js.
 // /          -> app/
 // /design/*  -> design/   (index.html nạp ../design/tokens.css)
 const http = require('http');
@@ -84,7 +84,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`Đập Chuột đang chạy tại http://localhost:${PORT}`);
+  console.log(`Đập Sếp đang chạy tại http://localhost:${PORT}`);
 });
 
 // Dừng gọn khi Docker gửi tín hiệu
