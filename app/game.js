@@ -166,6 +166,43 @@
     }
   }
 
+  /* ---------------------------------------------------------------------
+     Rung khi đập trúng (điện thoại).
+     - Android (Chrome, Firefox…): navigator.vibrate.
+     - iPhone: Safari không có navigator.vibrate; từ iOS 18, bấm vào một
+       <input type="checkbox" switch> tạo một nhịp rung nhẹ — dùng làm dự phòng.
+     Máy không hỗ trợ thì bỏ qua, game vẫn chạy bình thường.
+     --------------------------------------------------------------------- */
+  const VIBRATE_MS = 40;
+  let hapticLabel = null;
+
+  function setupHaptics() {
+    if (typeof navigator.vibrate === 'function') return;
+    try {
+      const label = document.createElement('label');
+      label.setAttribute('aria-hidden', 'true');
+      label.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.setAttribute('switch', '');
+      input.tabIndex = -1;
+      label.appendChild(input);
+      document.body.appendChild(label);
+      hapticLabel = label;
+    } catch (e) {
+      hapticLabel = null;
+    }
+  }
+
+  function vibrateHit() {
+    try {
+      if (typeof navigator.vibrate === 'function') navigator.vibrate(VIBRATE_MS);
+      else if (hapticLabel) hapticLabel.click();
+    } catch (e) {
+      /* bỏ qua */
+    }
+  }
+
   // Tiếng “bốp”: tiếng gõ ngắn (nhiễu lọc) + tiếng “boing” trượt xuống
   function playHitSound() {
     if (!audioCtx || audioCtx.state !== 'running') return;
@@ -431,6 +468,7 @@
     state.score += CONFIG.POINTS_PER_HIT;
     renderScore();
     playHitSound();
+    vibrateHit();
 
     const cell = cells[hole];
     cell.node.classList.add('is-hit');
@@ -465,6 +503,7 @@
      --------------------------------------------------------------------- */
   function init() {
     buildGrid();
+    setupHaptics();
     renderStart();
     renderPhase();
     el.btnStart.addEventListener('click', startRound);
