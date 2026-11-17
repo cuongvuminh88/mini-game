@@ -172,10 +172,144 @@
   </div>
 </section>
 
+<!-- ===================== BỔ SUNG 17/11/2026: ĐĂNG KÝ NGƯỜI CHƠI & TRANG QUẢN TRỊ ===================== -->
+
+<section class="section" id="dang-ky">
+  <div class="container">
+    <h2>Đăng ký &amp; kiểm tra dữ liệu <span class="tag new">Mới · 17/11/2026</span></h2>
+    <p>Trình duyệt kiểm tra để báo lỗi sớm; <strong>máy chủ kiểm tra lại toàn bộ</strong> và là nơi quyết định cuối cùng. Cùng một bộ quy tắc, viết một lần ở máy chủ, phía trình duyệt làm theo.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Trường / chủ đề</th><th>Quy tắc</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QT-60</td><td>Chuẩn hoá chung</td><td>Mọi chuỗi: chuẩn hoá Unicode <strong>NFC</strong>, cắt khoảng trắng đầu/cuối, gộp nhiều khoảng trắng liền nhau thành một. Kiểm tra độ dài <em>sau</em> khi chuẩn hoá. Trường thừa trong yêu cầu bị bỏ qua.</td></tr>
+        <tr><td class="id">QT-61</td><td>Họ tên</td><td>Bắt buộc, 2–80 ký tự. Chỉ gồm chữ cái (mọi ngôn ngữ, kể cả tiếng Việt có dấu), dấu cách và <code>’ ' - .</code>. Phải có ít nhất một chữ cái. Lưu đúng như người dùng gõ (sau QT-60), không tự đổi hoa/thường.</td></tr>
+        <tr><td class="id">QT-62</td><td>Email</td><td>Bắt buộc, tối đa 254 ký tự, chuyển hết về chữ thường. Đúng dạng <code>phần-trước@tên-miền.đuôi</code>: đúng một <code>@</code>, không có khoảng trắng, tên miền có ít nhất một dấu chấm và đuôi ≥ 2 chữ cái. Không gửi email xác minh ở phiên bản này.</td></tr>
+        <tr><td class="id">QT-63</td><td>Số điện thoại</td><td>Bắt buộc. Bỏ dấu cách, dấu chấm, gạch nối, ngoặc. Đổi đầu <code>+84</code> hoặc <code>84</code> (khi theo sau có 9 số) thành <code>0</code>. Kết quả phải là <strong>10 chữ số</strong>, dạng <code>0[35789]xxxxxxxx</code> (di động Việt Nam). Lưu dạng đã chuẩn hoá, ví dụ <code>+84 912.345.678</code> → <code>0912345678</code>.</td></tr>
+        <tr><td class="id">QT-64</td><td>Đồng ý xử lý dữ liệu <span class="tag new">QĐ-10</span></td><td>Bắt buộc <code>consent: true</code>. Lưu thời điểm đồng ý vào <code>consent_at</code>. Thiếu hoặc khác <code>true</code> → từ chối.</td></tr>
+        <tr><td class="id">QT-65</td><td>Email đã có <span class="tag new">QĐ-09</span></td><td>Không tạo bản ghi mới, không sửa họ tên / số điện thoại cũ. Trả về mã người chơi của bản ghi cũ với mã trạng thái và nội dung <strong>giống hệt</strong> lần đăng ký mới (201). So khớp email sau khi đã chuyển chữ thường.</td></tr>
+        <tr><td class="id">QT-66</td><td>Mã người chơi</td><td>Mỗi người chơi có <code>token</code> ngẫu nhiên 128 bit (<code>crypto.randomBytes(16)</code>, dạng hex 32 ký tự), sinh lúc đăng ký. Đây là thứ duy nhất trình duyệt giữ để chứng minh “tôi là người chơi này”. Không bao giờ hiện trong trang admin hay file CSV.</td></tr>
+        <tr><td class="id">QT-67</td><td>Ghi nhớ trên trình duyệt</td><td>Lưu <code>localStorage</code> khoá <code>dap-chuot.player</code>, giá trị JSON <code>{"token": "…", "name": "Nguyễn Thị Lan"}</code>. Đọc/ghi bọc <code>try/catch</code> như QT-42: lỗi thì giữ trong bộ nhớ của phiên (tải lại trang sẽ phải đăng ký lại, QT-65 đảm bảo không sinh bản ghi trùng). Giá trị hỏng (không phải JSON, thiếu token) → coi như chưa đăng ký.</td></tr>
+        <tr><td class="id">QT-68</td><td>Kiểm tra lúc tải trang</td><td>Có token thì gọi <code>GET /api/players/me</code>. 200 → MH-01 với tên trả về. 404 → xoá <code>dap-chuot.player</code>, hiện MH-04. Lỗi mạng / 5xx → vẫn vào MH-01 bằng tên đã lưu (không bắt đăng ký lại chỉ vì mạng chập chờn).</td></tr>
+        <tr><td class="id">QT-69</td><td>“Không phải bạn?”</td><td>Xoá <code>dap-chuot.player</code> và kỷ lục <code>dap-chuot.highScore</code> trên trình duyệt (kỷ lục là của người trước), rồi hiện MH-04. Không gọi máy chủ.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section alt" id="database">
+  <div class="container">
+    <h2>Database <span class="tag new">QĐ-06</span></h2>
+    <p>SQLite qua <code>node:sqlite</code> (<code>DatabaseSync</code>) — có sẵn trong Node 22, không thêm dependency. File <code>/data/dap-sep.db</code> trong Docker volume <code>dap-sep-data</code>. Khi mở: bật <code>PRAGMA foreign_keys = ON</code>, <code>PRAGMA journal_mode = WAL</code>, và tự tạo bảng nếu chưa có.</p>
+<pre>CREATE TABLE IF NOT EXISTS players (
+  id           INTEGER PRIMARY KEY,
+  token        TEXT    NOT NULL UNIQUE,              -- QT-66
+  full_name    TEXT    NOT NULL,                     -- QT-61
+  name_search  TEXT    NOT NULL,                     -- QT-84: chữ thường, bỏ dấu
+  email        TEXT    NOT NULL UNIQUE,              -- QT-62, đã chữ thường
+  phone        TEXT    NOT NULL,                     -- QT-63, 10 số
+  consent_at   TEXT    NOT NULL,                     -- QT-64, ISO 8601 UTC
+  created_at   TEXT    NOT NULL                      -- ISO 8601 UTC
+);
+
+CREATE TABLE IF NOT EXISTS rounds (
+  id         INTEGER PRIMARY KEY,
+  player_id  INTEGER NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+  score      INTEGER NOT NULL CHECK (score &gt;= 0),
+  hits       INTEGER NOT NULL CHECK (hits &gt;= 0),
+  spawned    INTEGER NOT NULL CHECK (spawned &gt;= hits),
+  played_at  TEXT    NOT NULL                        -- ISO 8601 UTC
+);
+
+CREATE INDEX IF NOT EXISTS idx_rounds_player  ON rounds(player_id);
+CREATE INDEX IF NOT EXISTS idx_players_created ON players(created_at);</pre>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Quy tắc</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QT-75</td><td>Mọi câu SQL dùng tham số (<code>prepare(...).run(?, ?)</code>), không bao giờ ghép chuỗi người dùng vào SQL.</td></tr>
+        <tr><td class="id">QT-76</td><td>Thời gian lưu dạng ISO 8601 UTC (<code>new Date().toISOString()</code>). Chỉ đổi sang giờ Việt Nam (<code>Asia/Ho_Chi_Minh</code>) khi hiển thị và khi xuất CSV.</td></tr>
+        <tr><td class="id">QT-77</td><td>“Số lượt”, “Điểm cao nhất”, “Lần chơi cuối” không lưu riêng mà tính bằng <code>COUNT</code> / <code>MAX(score)</code> / <code>MAX(played_at)</code> trên bảng <code>rounds</code>.</td></tr>
+        <tr><td class="id">QT-78</td><td>Không mở được file database lúc khởi động (thiếu quyền ghi, ổ đầy) → ghi lỗi rõ ràng ra log và thoát với mã khác 0, để Docker báo container lỗi thay vì chạy nửa vời.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section" id="api">
+  <div class="container">
+    <h2>API</h2>
+    <p>Mọi API nhận và trả JSON (<code>Content-Type: application/json</code>), thân yêu cầu tối đa 10 KB. Lỗi kiểm tra dữ liệu trả 400 kèm <code>{"errors": {"email": "…"}}</code> với đúng câu thông báo ở MH-04.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Phương thức &amp; đường dẫn</th><th>Ai gọi</th><th>Thân yêu cầu</th><th>Kết quả</th></tr></thead>
+      <tbody>
+        <tr><td><code>POST /api/players</code></td><td>Người chơi</td><td><code>{fullName, email, phone, consent}</code></td><td>201 <code>{token, name}</code> · 400 · 429</td></tr>
+        <tr><td><code>GET /api/players/me</code></td><td>Người chơi</td><td>Header <code>Authorization: Bearer &lt;token&gt;</code></td><td>200 <code>{name}</code> · 404</td></tr>
+        <tr><td><code>POST /api/rounds</code></td><td>Người chơi</td><td>Header như trên · <code>{score, hits, spawned}</code></td><td>201 · 400 · 404 · 429</td></tr>
+        <tr><td><code>POST /admin/login</code></td><td>Admin</td><td><code>{username, password}</code></td><td>204 + cookie · 401 · 429 · 503</td></tr>
+        <tr><td><code>POST /admin/logout</code></td><td>Admin</td><td>—</td><td>204, xoá cookie</td></tr>
+        <tr><td><code>GET /api/admin/players?q=&amp;page=</code></td><td>Admin</td><td>—</td><td>200 <code>{total, page, pages, items[]}</code> · 401</td></tr>
+        <tr><td><code>DELETE /api/admin/players/:id</code></td><td>Admin</td><td>—</td><td>204 · 404 · 401</td></tr>
+        <tr><td><code>GET /api/admin/players.csv?q=</code></td><td>Admin</td><td>—</td><td>200 file CSV · 401</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Quy tắc</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QT-70</td><td><strong>Giới hạn tần suất</strong> theo địa chỉ IP, đếm trong bộ nhớ: đăng ký tối đa 10 lần / 10 phút; lưu lượt tối đa 1 lần / 20 giây cho mỗi token (một lượt dài 30 giây nên chơi thật không bao giờ chạm). Vượt → 429.</td></tr>
+        <tr><td class="id">QT-71</td><td><strong>Kiểm tra lượt</strong> trước khi lưu: <code>score</code>, <code>hits</code>, <code>spawned</code> là số nguyên ≥ 0; <code>score = hits</code>; <code>hits ≤ spawned</code>; <code>spawned ≤ 60</code> (30 giây ÷ 0,8 giây chu kỳ ngắn nhất ≈ 38, chừa dư). Sai → 400, không lưu. Đây chỉ là chặn số vô lý, không chống được gian lận có chủ đích.</td></tr>
+        <tr><td class="id">QT-72</td><td><strong>Gửi kết quả lượt</strong> chạy nền khi vào <code>END</code>, sau khi đã tính kỷ lục (QT-13). Chờ tối đa 5 giây; lỗi hoặc hết giờ chờ → hiện dòng nhắc ở MH-03, không thử lại. Bấm “Chơi lại” trong lúc đang gửi không huỷ yêu cầu đang gửi. Trả 404 (người chơi đã bị xoá) → xử lý như QT-68.</td></tr>
+        <tr><td class="id">QT-73</td><td><strong>Log máy chủ</strong> không chứa dữ liệu cá nhân: chỉ ghi phương thức, đường dẫn <em>không kèm query string</em>, mã trạng thái, <code>id</code> người chơi nếu có. Không ghi họ tên, email, số điện thoại, token, mật khẩu, từ khoá tìm kiếm.</td></tr>
+        <tr><td class="id">QT-74</td><td>Máy chủ hiện chỉ nhận <code>GET</code>/<code>HEAD</code> (trả 405 cho mọi thứ khác). Phải mở thêm <code>POST</code>/<code>DELETE</code> <strong>chỉ</strong> cho các đường dẫn trong bảng trên; phục vụ file tĩnh giữ nguyên quy tắc cũ.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section alt" id="admin">
+  <div class="container">
+    <h2>Trang quản trị <span class="tag new">QĐ-08</span></h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Chủ đề</th><th>Quy tắc</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QT-80</td><td>Tài khoản</td><td>Đọc <code>ADMIN_USER</code> và <code>ADMIN_PASSWORD</code> từ biến môi trường lúc khởi động (truyền qua <code>env_file: .env</code> trong <code>compose.yaml</code>; <code>.env</code> đã nằm trong <code>.gitignore</code>). Thiếu một trong hai, hoặc mật khẩu ngắn hơn 12 ký tự → trang admin tắt (503) và ghi cảnh báo ra log; phần game vẫn chạy. So sánh bằng <code>crypto.timingSafeEqual</code> trên mã băm SHA-256 của hai bên (độ dài bằng nhau, thời gian so sánh không lộ thông tin).</td></tr>
+        <tr><td class="id">QT-81</td><td>Chống dò mật khẩu</td><td>Sai 5 lần trong 15 phút từ cùng một IP → khoá đăng nhập từ IP đó 15 phút (429), kể cả khi lần sau nhập đúng. Đăng nhập đúng thì xoá bộ đếm của IP đó.</td></tr>
+        <tr><td class="id">QT-82</td><td>Phiên</td><td>Đăng nhập đúng → sinh mã phiên ngẫu nhiên 256 bit, giữ trong bộ nhớ máy chủ kèm thời điểm hết hạn (8 giờ). Cookie <code>admin_session</code>: <code>HttpOnly; SameSite=Strict; Path=/; Max-Age=28800</code>, thêm <code>Secure</code> khi chạy sau HTTPS. Khởi động lại máy chủ thì mọi phiên mất, admin đăng nhập lại — chấp nhận được.</td></tr>
+        <tr><td class="id">QT-83</td><td>Chống giả mạo yêu cầu</td><td>Với <code>POST</code>/<code>DELETE</code> của admin: ngoài <code>SameSite=Strict</code>, kiểm tra header <code>Origin</code> (hoặc <code>Referer</code> nếu thiếu) phải trùng địa chỉ trang; sai → 403.</td></tr>
+        <tr><td class="id">QT-84</td><td>Tìm kiếm</td><td>Từ khoá: QT-60, tối đa 100 ký tự, rỗng = xem tất cả. Khớp nếu <strong>một trong ba</strong>: <code>name_search</code> chứa từ khoá đã bỏ dấu và chuyển chữ thường (NFD, bỏ dấu kết hợp, <code>đ→d</code>); <code>email</code> chứa từ khoá chữ thường; <code>phone</code> chứa phần chữ số của từ khoá (nếu từ khoá có ≥ 3 chữ số). Dùng <code>LIKE ? ESCAPE '\'</code>, thoát <code>%</code> và <code>_</code> trong từ khoá. Sắp xếp <code>created_at</code> giảm dần.</td></tr>
+        <tr><td class="id">QT-85</td><td>Xuất CSV</td><td>
+          <ul>
+            <li>UTF-8 <strong>có BOM</strong> (để Excel nhận đúng tiếng Việt), phân cách dấu phẩy, xuống dòng CRLF, theo RFC 4180: ô chứa dấu phẩy, dấu ngoặc kép hoặc xuống dòng thì bọc trong <code>"…"</code>, dấu <code>"</code> bên trong nhân đôi.</li>
+            <li>Cột: <code>Mã, Họ tên, Email, Số điện thoại, Ngày đăng ký, Đồng ý lúc, Số lượt, Điểm cao nhất, Lần chơi cuối</code>. Thời gian theo giờ Việt Nam, dạng <code>dd/mm/yyyy HH:mm</code>.</li>
+            <li><strong>Chống chèn công thức:</strong> ô bắt đầu bằng <code>= + - @</code>, tab hoặc CR thì thêm dấu <code>'</code> ở đầu.</li>
+            <li>Theo bộ lọc <code>q</code> hiện tại, toàn bộ kết quả (không phân trang). Tên file <code>nguoi-choi-YYYYMMDD-HHmm.csv</code>, header <code>Content-Disposition: attachment</code>.</li>
+            <li>Số điện thoại xuất nguyên dạng <code>0912345678</code>. Excel mở bằng nhấp đúp có thể làm mất số 0 đầu — đây là giới hạn của Excel; ghi chú trong TC-84.</li>
+          </ul>
+        </td></tr>
+        <tr><td class="id">QT-86</td><td>Xoá <span class="tag new">QĐ-11</span></td><td>Xoá theo <code>id</code> trong một giao dịch; <code>ON DELETE CASCADE</code> xoá các lượt. Xoá <code>id</code> không tồn tại (đã bị xoá ở tab khác) → 404, giao diện coi như đã xoá và làm mới danh sách. Token của người bị xoá hết hiệu lực ngay.</td></tr>
+        <tr><td class="id">QT-87</td><td>Header bảo mật</td><td>Mọi trang và API admin: <code>Cache-Control: no-store</code>, <code>X-Frame-Options: DENY</code>, <code>X-Robots-Tag: noindex</code>. Dữ liệu người chơi luôn chèn vào trang bằng <code>textContent</code>, không bao giờ bằng <code>innerHTML</code> (chống XSS từ họ tên do người dùng nhập).</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section" id="tac-dong">
+  <div class="container">
+    <h2>Triển khai &amp; tác động lên quy tắc cũ</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Quy tắc</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QT-90</td><td><strong>Thay thế QT-56</strong> cho bản có đăng ký <span class="tag new">QĐ-12</span>: game phải chạy qua máy chủ (<code>http://localhost:3000</code> hoặc tên miền thật). Mở bằng <code>file://</code> hoặc máy chủ không trả lời khi đăng ký → MH-04 hiện lỗi chung “Không kết nối được máy chủ”, không vào được game.</td></tr>
+        <tr><td class="id">QT-91</td><td><code>compose.yaml</code> thêm volume có tên <code>dap-sep-data</code> gắn vào <code>/data</code>, và <code>env_file: .env</code>. Dockerfile tạo <code>/data</code> thuộc user <code>node</code>. <code>docker compose down</code> không xoá dữ liệu; chỉ <code>down -v</code> mới xoá.</td></tr>
+        <tr><td class="id">QT-92</td><td>Kỷ lục (QT-40→QT-43) <strong>giữ nguyên</strong>: vẫn tính và lưu trên trình duyệt. Điểm cao nhất trên trang admin tính riêng từ bảng <code>rounds</code> (QT-77), hai con số có thể khác nhau (ví dụ khi lưu lượt thất bại).</td></tr>
+        <tr><td class="id">QT-93</td><td><code>node:sqlite</code> cần Node ≥ 22.13 để chạy không cần cờ; ảnh <code>node:22-alpine</code> hiện tại đáp ứng. Sửa <code>"engines"</code> trong <code>package.json</code> thành <code>"node": "&gt;=22.13"</code>. Module này vẫn ở mức thử nghiệm nên in một cảnh báo lúc khởi động; chấp nhận được.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
 <div class="container pager">
   <a href="03-man-hinh.html">‹ Màn hình</a>
   <a href="05-ke-hoach-test.html">Kế hoạch test ›</a>
 </div>
-<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 13/11/2026</div></footer>
+<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 17/11/2026</div></footer>
 </body>
 </html>

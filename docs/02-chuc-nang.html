@@ -105,10 +105,80 @@
   </div>
 </section>
 
+<!-- ===================== BỔ SUNG 17/11/2026: ĐĂNG KÝ NGƯỜI CHƠI & TRANG QUẢN TRỊ ===================== -->
+
+<section class="section alt" id="dang-ky">
+  <div class="container">
+    <h2>Đăng ký người chơi &amp; trang quản trị <span class="tag new">Mới · 17/11/2026</span></h2>
+    <p>Trước khi chơi lần đầu, người chơi nhập họ tên, email, số điện thoại. Dữ liệu lưu vào database trên máy chủ, cùng với kết quả từng lượt chơi. Quản trị viên đăng nhập vào trang admin để xem, tìm kiếm, xoá và xuất danh sách ra file CSV.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Chức năng</th><th>Mô tả</th><th>Ưu tiên</th></tr></thead>
+      <tbody>
+        <tr><td class="id">CN-13</td><td>Đăng ký người chơi</td><td>Lần đầu mở game (trình duyệt chưa nhớ người chơi): hiện màn hình Đăng ký (MH-04) với 3 ô họ tên, email, số điện thoại và ô đồng ý xử lý dữ liệu. Kiểm tra dữ liệu ngay trên trình duyệt và kiểm tra lại trên máy chủ (QT-61→QT-64). Đăng ký thành công thì sang màn hình Bắt đầu.</td><td><span class="tag">Bắt buộc</span></td></tr>
+        <tr><td class="id">CN-14</td><td>Ghi nhớ người chơi</td><td>Sau khi đăng ký, trình duyệt lưu mã người chơi; các lần mở sau vào thẳng màn hình Bắt đầu với lời chào “Xin chào, &lt;tên&gt;”. Nếu máy chủ báo mã không còn (đã bị admin xoá) thì quên mã và hiện lại màn hình Đăng ký.</td><td><span class="tag">Bắt buộc</span></td></tr>
+        <tr><td class="id">CN-15</td><td>Đổi người chơi</td><td>Màn hình Bắt đầu có liên kết “Không phải bạn?”: quên người chơi trên trình duyệt này và quay về màn hình Đăng ký. Không xoá dữ liệu trên máy chủ.</td><td><span class="tag">Bắt buộc</span></td></tr>
+        <tr><td class="id">CN-16</td><td>Lưu kết quả lượt</td><td>Khi lượt kết thúc, gửi điểm, số lần trúng (X) và số chuột (Y) lên máy chủ, gắn với người chơi. Gửi lỗi thì game vẫn chạy bình thường, chỉ hiện dòng nhắc nhỏ; không chặn nút “Chơi lại”.</td><td><span class="tag">Bắt buộc</span></td></tr>
+        <tr><td class="id">CN-17</td><td>Đăng nhập admin</td><td>Trang <code>/admin</code> yêu cầu đăng nhập (MH-10). Một tài khoản duy nhất, tên và mật khẩu đặt qua biến môi trường. Sai quá 5 lần trong 15 phút thì tạm khoá đăng nhập từ địa chỉ đó.</td><td><span class="tag">Bắt buộc</span></td></tr>
+        <tr><td class="id">CN-18</td><td>Danh sách người chơi</td><td>Bảng người chơi (MH-11): họ tên, email, số điện thoại, ngày đăng ký, số lượt, điểm cao nhất, lần chơi cuối. Mới đăng ký xếp trên cùng, 20 dòng mỗi trang, có tổng số người chơi.</td><td><span class="tag">Bắt buộc</span></td></tr>
+        <tr><td class="id">CN-19</td><td>Tìm kiếm</td><td>Một ô tìm kiếm, tìm theo họ tên, email hoặc số điện thoại. Không phân biệt hoa/thường và dấu tiếng Việt (gõ “nguyen” tìm được “Nguyễn”).</td><td><span class="tag">Bắt buộc</span></td></tr>
+        <tr><td class="id">CN-20</td><td>Xoá người chơi</td><td>Mỗi dòng có nút “Xoá”; bấm thì hiện hộp xác nhận (MH-12) ghi rõ tên và email. Xác nhận thì xoá hẳn người chơi và mọi lượt chơi của họ, không khôi phục được.</td><td><span class="tag">Bắt buộc</span></td></tr>
+        <tr><td class="id">CN-21</td><td>Xuất CSV</td><td>Nút “Xuất CSV” tải về file chứa <strong>toàn bộ</strong> người chơi khớp bộ lọc tìm kiếm hiện tại (không chỉ trang đang xem). Mở được bằng Excel và Google Sheets, hiện đúng tiếng Việt.</td><td><span class="tag">Bắt buộc</span></td></tr>
+        <tr><td class="id">CN-22</td><td>Đăng xuất admin</td><td>Nút “Đăng xuất” huỷ phiên ngay. Phiên tự hết hạn sau 8 giờ; hết hạn thì mọi thao tác đưa về màn hình đăng nhập.</td><td><span class="tag">Bắt buộc</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section" id="luong-moi">
+  <div class="container">
+    <h2>Luồng người dùng mới</h2>
+    <h3>Người chơi</h3>
+    <div class="flow">
+      <span class="state">Mở trang</span><span class="arrow">→ chưa đăng ký →</span>
+      <span class="state">Đăng ký</span><span class="arrow">→ gửi thành công →</span>
+      <span class="state">Bắt đầu</span><span class="arrow">→</span>
+      <span class="state">Đang chơi</span><span class="arrow">→</span>
+      <span class="state">Kết thúc</span><span class="arrow">→ lưu kết quả lên máy chủ</span>
+    </div>
+    <div class="flow">
+      <span class="state">Mở trang</span><span class="arrow">→ đã đăng ký →</span>
+      <span class="state">Bắt đầu (“Xin chào, Lan”)</span><span class="arrow">→ “Không phải bạn?” →</span>
+      <span class="state">Đăng ký</span>
+    </div>
+    <h3>Quản trị viên</h3>
+    <div class="flow">
+      <span class="state">/admin</span><span class="arrow">→ chưa đăng nhập →</span>
+      <span class="state">Đăng nhập</span><span class="arrow">→ đúng →</span>
+      <span class="state">Danh sách</span><span class="arrow">→ tìm / xoá / xuất CSV →</span>
+      <span class="state">Đăng xuất</span>
+    </div>
+    <p class="muted">Đăng ký thay thế bước “Mở trang → Bắt đầu” ở luồng cũ chỉ cho lần đầu. Từ màn hình Bắt đầu trở đi, luồng chơi giữ nguyên như mục “Luồng người dùng” ở trên.</p>
+  </div>
+</section>
+
+<section class="section alt" id="quyet-dinh-moi">
+  <div class="container">
+    <h2>Quyết định đã chốt cho tính năng mới</h2>
+    <p>Nối tiếp QĐ-01→QĐ-05 ở trang Tổng quan.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Câu hỏi</th><th>Quyết định</th></tr></thead>
+      <tbody>
+        <tr><td class="id">QĐ-06</td><td>Dùng database nào?</td><td><strong>SQLite</strong> qua module <code>node:sqlite</code> có sẵn trong Node 22. Một file <code>.db</code> nằm trong Docker volume. Không thêm container, không thêm dependency.</td></tr>
+        <tr><td class="id">QĐ-07</td><td>Đăng ký bao lâu một lần? Có lưu điểm không?</td><td><strong>Đăng ký một lần</strong> trên mỗi trình duyệt. <strong>Mọi lượt chơi đều lưu</strong> lên máy chủ, gắn với người chơi.</td></tr>
+        <tr><td class="id">QĐ-08</td><td>Đăng nhập admin thế nào?</td><td><strong>Một tài khoản</strong>, đặt bằng biến môi trường <code>ADMIN_USER</code> / <code>ADMIN_PASSWORD</code> trong file <code>.env</code> (không commit). Phiên lưu bằng cookie HttpOnly.</td></tr>
+        <tr><td class="id">QĐ-09</td><td>Đăng ký bằng email đã có thì sao?</td><td>Dùng lại hồ sơ cũ, <strong>không ghi đè</strong> họ tên và số điện thoại đã lưu. Phản hồi giống hệt đăng ký mới để không lộ email nào đã có trong hệ thống.</td></tr>
+        <tr><td class="id">QĐ-10</td><td>Có cần người chơi đồng ý xử lý dữ liệu?</td><td><strong>Có, bắt buộc.</strong> Thông tin liên hệ là dữ liệu cá nhân (Nghị định 13/2023/NĐ-CP). Ô đồng ý không tick sẵn; lưu thời điểm đồng ý.</td></tr>
+        <tr><td class="id">QĐ-11</td><td>Xoá là xoá mềm hay xoá hẳn?</td><td><strong>Xoá hẳn</strong> người chơi và các lượt của họ. Đáp ứng quyền yêu cầu xoá dữ liệu; muốn giữ lại thì xuất CSV trước.</td></tr>
+        <tr><td class="id">QĐ-12</td><td>Game còn chạy bằng <code>file://</code> không?</td><td><strong>Không.</strong> Vì phải đăng ký trước khi chơi, game cần máy chủ Node (Docker). QT-56 và TC-41 không còn áp dụng cho bản có đăng ký; xem QT-90.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
 <div class="container pager">
   <a href="01-tong-quan.html">‹ Tổng quan</a>
   <a href="03-man-hinh.html">Màn hình ›</a>
 </div>
-<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 13/11/2026</div></footer>
+<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 17/11/2026</div></footer>
 </body>
 </html>

@@ -155,10 +155,137 @@
   </div>
 </section>
 
+<!-- ===================== BỔ SUNG 17/11/2026: ĐĂNG KÝ NGƯỜI CHƠI & TRANG QUẢN TRỊ ===================== -->
+
+<section class="section alt" id="test-moi">
+  <div class="container">
+    <h2>Test tính năng đăng ký &amp; quản trị <span class="tag new">Mới · 17/11/2026</span></h2>
+    <ul>
+      <li><strong>Môi trường:</strong> chạy bằng <code>docker compose up -d --build</code>, mở <code>http://localhost:3000</code> (không dùng <code>file://</code>, xem QT-90). File <code>.env</code> test có <code>ADMIN_USER</code> và <code>ADMIN_PASSWORD</code> ≥ 12 ký tự, không dùng mật khẩu thật.</li>
+      <li><strong>Dữ liệu sạch:</strong> trước mỗi đợt test, <code>docker compose down -v</code> để xoá volume database, và xoá dữ liệu trang trên trình duyệt.</li>
+      <li><strong>Kiểm tra database:</strong> <code>docker compose exec app node -e "…"</code> hoặc chép file <code>.db</code> ra mở bằng công cụ SQLite, để đối chiếu với giao diện.</li>
+      <li><strong>Gọi API trực tiếp</strong> bằng <code>curl</code> cho các ca máy chủ phải tự chặn (TC-56, TC-63, TC-91…). Chỉ dùng dữ liệu giả, ví dụ <code>test01@example.com</code>.</li>
+      <li>Ca TC-40 (không lỗi Console) áp dụng cho cả trang game và trang admin.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Ca kiểm thử đăng ký người chơi</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Bước</th><th>Kết quả mong đợi</th><th>Liên quan</th><th>Kết quả</th></tr></thead>
+      <tbody>
+        <tr><td class="id">TC-50</td><td>Trình duyệt sạch, mở game.</td><td>Hiện MH-04, không thấy MH-01; focus ở ô Họ tên; ô đồng ý chưa tick.</td><td>CN-13, MH-04</td><td></td></tr>
+        <tr><td class="id">TC-51</td><td>Nhập “Nguyễn Thị Lan”, “Lan@Gmail.com ”, “+84 912.345.678”, tick đồng ý, bấm “Đăng ký &amp; chơi”.</td><td>Vào MH-01 với “Xin chào, Lan”. Database có 1 dòng: email <code>lan@gmail.com</code>, phone <code>0912345678</code>, có <code>consent_at</code>.</td><td>CN-13, QT-62, QT-63, QT-64</td><td></td></tr>
+        <tr><td class="id">TC-52</td><td>Bấm gửi khi để trống cả 4 mục.</td><td>Mỗi ô hiện đúng câu lỗi của mình; focus nhảy vào ô Họ tên; không có yêu cầu nào gửi lên máy chủ (xem tab Network).</td><td>MH-04</td><td></td></tr>
+        <tr><td class="id">TC-53</td><td>Họ tên: “A”, chuỗi 81 ký tự, “Lan123”, “&lt;b&gt;Lan&lt;/b&gt;”, “   ”, “Đặng Ngọc Ánh”, “O’Brien-Lê”.</td><td>5 giá trị đầu bị từ chối với câu lỗi QT-61; 2 giá trị cuối được chấp nhận.</td><td>QT-60, QT-61</td><td></td></tr>
+        <tr><td class="id">TC-54</td><td>Email: “lan”, “lan@gmail”, “lan@@gmail.com”, “lan @gmail.com”, “lan@gmail.c”, “lan.nguyen+game@sub.example.vn”.</td><td>5 giá trị đầu bị từ chối; giá trị cuối được chấp nhận.</td><td>QT-62</td><td></td></tr>
+        <tr><td class="id">TC-55</td><td>Số điện thoại: “0912345678”, “0912 345 678”, “84912345678”, “+84-912-345-678”, “091234567”, “09123456789”, “0212345678”, “abc”.</td><td>4 giá trị đầu được chấp nhận và đều lưu thành <code>0912345678</code>; 4 giá trị sau bị từ chối.</td><td>QT-63</td><td></td></tr>
+        <tr><td class="id">TC-56</td><td>Dùng <code>curl</code> gửi thẳng <code>POST /api/players</code> với email sai, rồi với <code>consent: false</code>, rồi thiếu <code>consent</code>.</td><td>Cả ba trả 400 kèm <code>errors</code>; database không thêm dòng nào.</td><td>QT-60→QT-64</td><td></td></tr>
+        <tr><td class="id">TC-57</td><td>Không tick đồng ý, điền đủ, bấm gửi.</td><td>Hiện “Bạn cần đồng ý để tiếp tục.”; không gửi.</td><td>QĐ-10</td><td></td></tr>
+        <tr><td class="id">TC-58</td><td>Sau TC-51, ở trình duyệt khác đăng ký lại với “LAN@gmail.com”, tên “Người Khác”, số “0987654321”.</td><td>Vào được MH-01. Database vẫn chỉ 1 dòng với tên và số cũ. Phản hồi API (mã trạng thái, các trường) giống hệt TC-51.</td><td>QĐ-09, QT-65</td><td></td></tr>
+        <tr><td class="id">TC-59</td><td>Ngắt mạng (hoặc <code>docker compose stop</code>), điền đủ rồi gửi.</td><td>Hiện “Không kết nối được máy chủ…”; dữ liệu đã nhập còn nguyên; bật lại máy chủ, bấm gửi lần nữa thì thành công.</td><td>MH-04</td><td></td></tr>
+        <tr><td class="id">TC-60</td><td>Mạng chậm (DevTools → Slow 3G), bấm “Đăng ký &amp; chơi” 5 lần thật nhanh.</td><td>Nút đổi “Đang gửi…” và bị vô hiệu; database chỉ có 1 dòng.</td><td>MH-04</td><td></td></tr>
+        <tr><td class="id">TC-61</td><td>Dùng <code>curl</code> gửi 11 yêu cầu đăng ký liên tiếp từ cùng máy trong 10 phút.</td><td>10 yêu cầu đầu được xử lý; yêu cầu thứ 11 nhận 429.</td><td>QT-70</td><td></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="container">
+    <h2>Ca kiểm thử ghi nhớ người chơi &amp; lưu lượt</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Bước</th><th>Kết quả mong đợi</th><th>Liên quan</th><th>Kết quả</th></tr></thead>
+      <tbody>
+        <tr><td class="id">TC-62</td><td>Sau TC-51, tải lại trang; đóng hẳn trình duyệt rồi mở lại.</td><td>Cả hai lần vào thẳng MH-01 “Xin chào, Lan”, không hỏi đăng ký.</td><td>CN-14, QT-67, QT-68</td><td></td></tr>
+        <tr><td class="id">TC-63</td><td>Chơi hết 1 lượt được 12 điểm, trúng 12 / 30.</td><td>Bảng <code>rounds</code> có 1 dòng <code>score=12, hits=12, spawned=30</code>, gắn đúng người chơi. Không có dòng nhắc lỗi ở MH-03.</td><td>CN-16, QT-72</td><td></td></tr>
+        <tr><td class="id">TC-64</td><td>Dừng máy chủ, chơi hết 1 lượt, rồi bấm “Chơi lại” ngay.</td><td>MH-03 hiện “Chưa lưu được kết quả lượt này.” trong ≤ 5 giây; kỷ lục trên trình duyệt vẫn cập nhật đúng; “Chơi lại” hoạt động bình thường; không có lỗi đỏ trong Console.</td><td>CN-16, QT-72</td><td></td></tr>
+        <tr><td class="id">TC-65</td><td>Dùng <code>curl</code> gửi <code>POST /api/rounds</code> với: <code>score≠hits</code>; <code>hits&gt;spawned</code>; số âm; số thập phân; <code>spawned=500</code>; không có token; token sai.</td><td>5 trường hợp đầu trả 400; 2 trường hợp cuối trả 404. Không có dòng nào được lưu.</td><td>QT-71</td><td></td></tr>
+        <tr><td class="id">TC-66</td><td>Dùng <code>curl</code> gửi 2 lượt hợp lệ cách nhau 5 giây với cùng token.</td><td>Lượt đầu 201, lượt sau 429.</td><td>QT-70</td><td></td></tr>
+        <tr><td class="id">TC-67</td><td>Ở MH-01 bấm “Không phải bạn?”.</td><td>Hiện MH-04 trống; <code>dap-chuot.player</code> và <code>dap-chuot.highScore</code> bị xoá khỏi localStorage; database không đổi.</td><td>CN-15, QT-69</td><td></td></tr>
+        <tr><td class="id">TC-68</td><td>Admin xoá Lan (TC-82), rồi trên trình duyệt của Lan tải lại trang.</td><td>Hiện MH-04; <code>dap-chuot.player</code> bị xoá.</td><td>CN-14, QT-68, QT-86</td><td></td></tr>
+        <tr><td class="id">TC-69</td><td>Có token hợp lệ trong localStorage, dừng máy chủ, tải lại trang (mở qua bản lưu bộ nhớ đệm hoặc giả lập mạng lỗi chỉ cho <code>/api</code>).</td><td>Vẫn vào MH-01 “Xin chào, Lan”, không bắt đăng ký lại.</td><td>QT-68</td><td></td></tr>
+        <tr><td class="id">TC-70</td><td>Trong DevTools đặt <code>dap-chuot.player</code> = <code>"abc"</code> rồi <code>{"name":"X"}</code>; tải lại mỗi lần.</td><td>Hiện MH-04, không lỗi đỏ.</td><td>QT-67</td><td></td></tr>
+        <tr><td class="id">TC-71</td><td>Cửa sổ riêng tư / chặn dữ liệu trang: đăng ký, chơi 2 lượt, tải lại.</td><td>Đăng ký và chơi được, 2 lượt được lưu; sau khi tải lại phải đăng ký lại bằng cùng email và database không sinh dòng trùng.</td><td>QT-67, QT-65</td><td></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Ca kiểm thử trang quản trị</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Bước</th><th>Kết quả mong đợi</th><th>Liên quan</th><th>Kết quả</th></tr></thead>
+      <tbody>
+        <tr><td class="id">TC-72</td><td>Chưa đăng nhập, mở <code>/admin</code>; dùng <code>curl</code> gọi <code>/api/admin/players</code> và <code>/api/admin/players.csv</code>.</td><td>Trình duyệt chuyển về <code>/admin/login</code>; hai lệnh <code>curl</code> trả 401, không lộ dữ liệu.</td><td>CN-17</td><td></td></tr>
+        <tr><td class="id">TC-73</td><td>Đăng nhập sai mật khẩu; sai tên đăng nhập; đúng cả hai.</td><td>Hai lần sai hiện cùng một câu, ô mật khẩu bị xoá; lần đúng vào MH-11.</td><td>CN-17, MH-10</td><td></td></tr>
+        <tr><td class="id">TC-74</td><td>Sai 5 lần liên tiếp, lần thứ 6 nhập đúng.</td><td>Lần 6 vẫn bị từ chối với câu “…Thử lại sau 15 phút.” (429). Chờ 15 phút (hoặc khởi động lại máy chủ) thì đăng nhập được.</td><td>QT-81</td><td></td></tr>
+        <tr><td class="id">TC-75</td><td>Đăng nhập, xem cookie trong DevTools → Application.</td><td>Có <code>admin_session</code> với HttpOnly, SameSite=Strict, Max-Age 28800. <code>document.cookie</code> trong Console không thấy cookie này.</td><td>QT-82</td><td></td></tr>
+        <tr><td class="id">TC-76</td><td>Bấm “Đăng xuất”, rồi bấm nút Quay lại của trình duyệt.</td><td>Về MH-10; trang danh sách cũ không hiện lại dữ liệu (no-store) và thao tác bất kỳ đều đưa về đăng nhập.</td><td>CN-22, QT-87</td><td></td></tr>
+        <tr><td class="id">TC-77</td><td>Đang đăng nhập, <code>docker compose restart</code>, rồi bấm sang trang 2.</td><td>Về MH-10 với “Phiên đăng nhập đã hết hạn.”</td><td>QT-82, MH-11</td><td></td></tr>
+        <tr><td class="id">TC-78</td><td>Bỏ <code>ADMIN_PASSWORD</code> khỏi <code>.env</code> (rồi thử với mật khẩu 8 ký tự), khởi động lại.</td><td>Log có cảnh báo; <code>/admin</code> hiện “Trang quản trị chưa được bật.” (503); game vẫn chơi và đăng ký được.</td><td>QT-80</td><td></td></tr>
+        <tr><td class="id">TC-79</td><td>Tạo 45 người chơi giả (script), mở MH-11.</td><td>“Người chơi (45)”, trang 1 có 20 dòng mới nhất trước; có 3 trang; “‹ Trước” bị vô hiệu ở trang 1, “Sau ›” ở trang 3. Số lượt, điểm cao nhất, lần chơi cuối khớp bảng <code>rounds</code>; người chưa chơi hiện “—”.</td><td>CN-18, QT-77</td><td></td></tr>
+        <tr><td class="id">TC-80</td><td>Tìm “nguyen”, “NGUYỄN”, “ánh”, “gmail.com”, “345 678”, “0912”, “zzz”.</td><td>“nguyen” và “NGUYỄN” cho cùng kết quả gồm mọi tên có “Nguyễn”; “ánh” tìm được “Ánh” và “Anh”; tìm theo đuôi email và phần số điện thoại đều khớp; “zzz” hiện câu không tìm thấy. Tổng số trên tiêu đề đổi theo bộ lọc.</td><td>CN-19, QT-84</td><td></td></tr>
+        <tr><td class="id">TC-81</td><td>Tìm “%”, “_”, “'”, “\”; tải lại trang khi đang ở <code>?q=lan&amp;page=2</code>.</td><td>4 ký tự đặc biệt chỉ khớp tên/email thật sự chứa chúng (không khớp tất cả), không lỗi máy chủ. Tải lại giữ nguyên từ khoá và trang.</td><td>QT-84, QT-75</td><td></td></tr>
+        <tr><td class="id">TC-82</td><td>Bấm “Xoá” ở dòng Lan → “Huỷ”; bấm lại → Esc; bấm lại → “Xoá”.</td><td>Hai lần đầu không xoá gì. Hộp ghi đúng tên, email và số lượt; focus mặc định ở “Huỷ”. Lần ba: dòng biến mất, tổng giảm 1, hiện “Đã xoá Nguyễn Thị Lan.”; database không còn người chơi lẫn lượt chơi của Lan.</td><td>CN-20, MH-12, QT-86</td><td></td></tr>
+        <tr><td class="id">TC-83</td><td>Mở MH-11 ở hai tab, xoá cùng một người ở tab 1 rồi tab 2. Xoá người duy nhất ở trang cuối.</td><td>Tab 2 không báo lỗi khó hiểu, danh sách được làm mới. Trang cuối trống thì tự lùi về trang trước.</td><td>QT-86, MH-12</td><td></td></tr>
+        <tr><td class="id">TC-84</td><td>Tìm “nguyen” rồi bấm “Xuất CSV”. Mở file bằng Excel (nhấp đúp), bằng Excel → Data → From Text/CSV, và bằng Google Sheets.</td><td>Tên file dạng <code>nguoi-choi-YYYYMMDD-HHmm.csv</code>; số dòng = tổng của bộ lọc (kể cả các trang chưa xem); tiếng Việt hiển thị đúng; giờ theo giờ Việt Nam; không có cột token. Ghi nhận: Excel mở bằng nhấp đúp có thể mất số 0 đầu số điện thoại (giới hạn đã biết, QT-85); hai cách còn lại giữ đúng.</td><td>CN-21, QT-85</td><td></td></tr>
+        <tr><td class="id">TC-85</td><td>Đăng ký người chơi tên “Lan, “Bé” Nguyễn” (qua <code>curl</code> nếu form chặn) và người có email bắt đầu bằng <code>=</code>, <code>+</code>, <code>-</code> hoặc <code>@</code> nếu QT-62 cho phép; xuất CSV, mở bằng Excel.</td><td>Ô có dấu phẩy và ngoặc kép nằm gọn trong một ô; không ô nào bị Excel chạy như công thức.</td><td>QT-85</td><td></td></tr>
+        <tr><td class="id">TC-86</td><td>Danh sách rỗng (sau <code>down -v</code>), mở MH-11 và bấm “Xuất CSV”.</td><td>Hiện “Chưa có người chơi nào đăng ký.”; file CSV tải được, chỉ có dòng tiêu đề.</td><td>MH-11, QT-85</td><td></td></tr>
+        <tr><td class="id">TC-87</td><td>Thu trang admin về 320px.</td><td>Trang không cuộn ngang; bảng cuộn ngang trong khung riêng; các nút vẫn bấm được.</td><td>MH-11</td><td></td></tr>
+        <tr><td class="id">TC-88</td><td>Chỉ dùng bàn phím: đăng nhập, tìm kiếm, mở hộp xoá, Huỷ, xuất CSV, đăng xuất.</td><td>Làm được hết; luôn thấy vòng focus; đóng hộp xoá thì focus quay về nút “Xoá” vừa bấm.</td><td>MH-10→MH-12, QĐ-05</td><td></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="container">
+    <h2>Ca kiểm thử bảo mật, dữ liệu &amp; triển khai</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="id">Mã</th><th>Bước</th><th>Kết quả mong đợi</th><th>Liên quan</th><th>Kết quả</th></tr></thead>
+      <tbody>
+        <tr><td class="id">TC-90</td><td>Đăng ký người chơi tên <code>Lan&lt;img src=x onerror=alert(1)&gt;</code> bằng <code>curl</code> (bỏ qua kiểm tra họ tên nếu cần, bằng cách chèn thẳng vào database), mở MH-11.</td><td><code>curl</code> bị từ chối 400 (QT-61). Dòng chèn thẳng hiển thị nguyên văn dưới dạng chữ, không bật hộp thoại.</td><td>QT-61, QT-87</td><td></td></tr>
+        <tr><td class="id">TC-91</td><td>Đang đăng nhập admin, từ một trang ở địa chỉ khác (ví dụ <code>http://127.0.0.1:8080</code>) gửi <code>fetch</code> <code>DELETE /api/admin/players/1</code> kèm <code>credentials: "include"</code>.</td><td>Bị chặn (cookie không được gửi hoặc 403); người chơi không bị xoá.</td><td>QT-83</td><td></td></tr>
+        <tr><td class="id">TC-92</td><td>Chạy toàn bộ TC-50→TC-88, rồi đọc <code>docker compose logs</code>.</td><td>Không có họ tên, email, số điện thoại, token, mật khẩu hay từ khoá tìm kiếm nào trong log.</td><td>QT-73</td><td></td></tr>
+        <tr><td class="id">TC-93</td><td>Đăng ký 2 người, chơi vài lượt; <code>docker compose down</code> rồi <code>up -d --build</code>.</td><td>Dữ liệu còn nguyên. Sau <code>down -v</code> thì dữ liệu mất (đúng như QT-91).</td><td>QT-91</td><td></td></tr>
+        <tr><td class="id">TC-94</td><td>Đọc code máy chủ: tìm mọi câu SQL.</td><td>Tất cả dùng <code>prepare</code> với tham số, không có ghép chuỗi.</td><td>QT-75</td><td></td></tr>
+        <tr><td class="id">TC-95</td><td><code>git status</code> sau khi tạo <code>.env</code> và chạy game.</td><td><code>.env</code> và file <code>.db</code> không xuất hiện trong danh sách cần commit.</td><td>QT-80, QT-91</td><td></td></tr>
+        <tr><td class="id">TC-96</td><td>Gửi <code>PUT /</code>, <code>POST /index.html</code>, <code>DELETE /api/players</code>; gửi <code>POST /api/players</code> với thân 20 KB.</td><td>Ba yêu cầu đầu vẫn trả 405 như cũ; thân quá lớn trả 413.</td><td>QT-74</td><td></td></tr>
+        <tr><td class="id">TC-97</td><td>Chạy lại bộ “Chính” TC-01→TC-22 với người chơi đã đăng ký.</td><td>Mọi ca cũ vẫn đạt; riêng TC-41 thay bằng QT-90 (game cần máy chủ).</td><td>QĐ-12</td><td></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2>Đối chiếu yêu cầu mới</h2>
+    <p>Mỗi phần của yêu cầu ngày 17/11/2026 được phủ bởi ít nhất một ca.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Yêu cầu</th><th>Chức năng</th><th>Ca kiểm thử</th></tr></thead>
+      <tbody>
+        <tr><td>Nhập họ tên, email, số điện thoại trước khi chơi</td><td>CN-13</td><td>TC-50→TC-61</td></tr>
+        <tr><td>Dữ liệu lưu vào database</td><td>CN-13, CN-16</td><td>TC-51, TC-63, TC-65, TC-93</td></tr>
+        <tr><td>Trang admin phải đăng nhập</td><td>CN-17, CN-22</td><td>TC-72→TC-78, TC-91</td></tr>
+        <tr><td>Xem danh sách</td><td>CN-18</td><td>TC-79, TC-87</td></tr>
+        <tr><td>Tìm kiếm</td><td>CN-19</td><td>TC-80, TC-81</td></tr>
+        <tr><td>Xoá</td><td>CN-20</td><td>TC-68, TC-82, TC-83</td></tr>
+        <tr><td>Xuất CSV</td><td>CN-21</td><td>TC-84→TC-86</td></tr>
+        <tr><td>Bảo vệ dữ liệu cá nhân</td><td>QĐ-10, QT-73, QT-87</td><td>TC-57, TC-90, TC-92, TC-95</td></tr>
+        <tr><td>Không phá game cũ</td><td>QT-92</td><td>TC-64, TC-97</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
 <div class="container pager">
   <a href="04-quy-tac-du-lieu.html">‹ Quy tắc &amp; dữ liệu</a>
   <a href="index.html">Mục lục ›</a>
 </div>
-<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 13/11/2026</div></footer>
+<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 17/11/2026</div></footer>
 </body>
 </html>

@@ -6,6 +6,23 @@
 <title>Màn hình — Đập Chuột</title>
 <link rel="stylesheet" href="../design/tokens.css">
 <link rel="stylesheet" href="docs.css">
+<style>
+  /* Phác thảo form & bảng admin — chỉ dùng cho mục bổ sung 17/11/2026 */
+  .mock-form { text-align: left; }
+  .mock-label { display: block; font-size: var(--text-caption-size); font-weight: var(--font-weight-semibold); margin: var(--space-3) 0 var(--space-1); }
+  .mock-input { border: 1px solid var(--color-border); border-radius: var(--radius-md, 8px); padding: var(--space-2) var(--space-3); font-size: var(--text-small-size); color: var(--color-text-tertiary); background: var(--color-bg); }
+  .mock-input.err { border-color: var(--color-danger); }
+  .mock-err { font-size: var(--text-caption-size); color: var(--color-danger); margin-top: var(--space-1); }
+  .mock-check { font-size: var(--text-caption-size); color: var(--color-text-secondary); margin: var(--space-4) 0; display: flex; gap: var(--space-2); align-items: flex-start; }
+  .mock-check span:first-child { flex: none; width: 16px; height: 16px; border: 1px solid var(--color-border); border-radius: 4px; margin-top: 2px; }
+  .mock-form .btn { display: block; text-align: center; }
+  .mock-link { font-size: var(--text-caption-size); color: var(--color-accent); text-decoration: underline; }
+  .desk { max-width: 720px; margin: 0 auto; border: 1px solid var(--color-border); border-radius: var(--radius-xl); background: var(--color-bg-elevated); padding: var(--space-5); box-shadow: var(--shadow-card); font-size: var(--text-small-size); }
+  .desk-bar { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; justify-content: space-between; margin-bottom: var(--space-4); }
+  .desk-bar .mock-input { flex: 1 1 200px; }
+  .desk table { font-size: var(--text-caption-size); }
+  .desk .del { color: var(--color-danger); }
+</style>
 </head>
 <body>
 <!-- Hình mẫu SVG dùng chung cho các mô phỏng bên dưới -->
@@ -210,10 +227,156 @@
   </div>
 </section>
 
+<!-- ===================== BỔ SUNG 17/11/2026: ĐĂNG KÝ NGƯỜI CHƠI & TRANG QUẢN TRỊ ===================== -->
+
+<section class="section alt" id="mh-moi">
+  <div class="container">
+    <h2>Màn hình mới: đăng ký &amp; quản trị <span class="tag new">Mới · 17/11/2026</span></h2>
+    <p class="muted">Phía người chơi thêm một màn hình (MH-04) trên cùng trang game. Phía quản trị là trang riêng <code>/admin</code> với ba màn hình (MH-10→MH-12), thiết kế cho máy tính nhưng vẫn dùng được ở 320px.</p>
+    <div class="mock-row">
+      <div>
+        <div class="phone mock-form" role="img" aria-label="Phác thảo màn hình Đăng ký">
+          <h4 style="text-align:center">Đăng ký để chơi</h4>
+          <p style="text-align:center">Nhập thông tin một lần, lần sau vào chơi ngay.</p>
+          <span class="mock-label">Họ tên</span><div class="mock-input">Nguyễn Thị Lan</div>
+          <span class="mock-label">Email</span><div class="mock-input err">lan@gmail</div><div class="mock-err">Email chưa đúng, ví dụ: ten@gmail.com</div>
+          <span class="mock-label">Số điện thoại</span><div class="mock-input">0912 345 678</div>
+          <div class="mock-check"><span></span><span>Tôi đồng ý cho lưu họ tên, email, số điện thoại để quản lý người chơi. <span class="mock-link">Chi tiết</span></span></div>
+          <span class="btn">Đăng ký &amp; chơi</span>
+        </div>
+        <p class="mock-cap">MH-04 · Đăng ký</p>
+      </div>
+      <div>
+        <div class="phone" role="img" aria-label="Phác thảo màn hình Bắt đầu khi đã đăng ký">
+          <svg width="96" height="96" aria-hidden="true"><use href="#i-mole"/></svg>
+          <h4>Đập Chuột</h4>
+          <p>Xin chào, <strong>Lan</strong> · <span class="mock-link">Không phải bạn?</span></p>
+          <p>Bấm trúng chuột để ghi điểm.<br>Bạn có 30 giây!</p>
+          <p>Kỷ lục: <strong>24</strong></p>
+          <span class="btn">Bắt đầu</span>
+        </div>
+        <p class="mock-cap">MH-01 · Bắt đầu (bổ sung lời chào)</p>
+      </div>
+      <div>
+        <div class="phone mock-form" role="img" aria-label="Phác thảo màn hình Đăng nhập admin">
+          <h4 style="text-align:center">Quản trị</h4>
+          <p style="text-align:center">Đăng nhập để xem danh sách người chơi.</p>
+          <span class="mock-label">Tên đăng nhập</span><div class="mock-input">admin</div>
+          <span class="mock-label">Mật khẩu</span><div class="mock-input">••••••••••••</div>
+          <div class="mock-err" style="margin:var(--space-3) 0">Sai tên đăng nhập hoặc mật khẩu.</div>
+          <span class="btn">Đăng nhập</span>
+        </div>
+        <p class="mock-cap">MH-10 · Đăng nhập admin</p>
+      </div>
+    </div>
+
+    <div style="margin-top:var(--space-8, 48px)">
+      <div class="desk" role="img" aria-label="Phác thảo màn hình Danh sách người chơi">
+        <div class="desk-bar"><strong>Người chơi (128)</strong><span class="mock-link">Đăng xuất</span></div>
+        <div class="desk-bar"><div class="mock-input">Tìm theo tên, email, số điện thoại…</div><span class="btn">Xuất CSV</span></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Họ tên</th><th>Email</th><th>Điện thoại</th><th>Đăng ký</th><th>Lượt</th><th>Cao nhất</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Nguyễn Thị Lan</td><td>lan@gmail.com</td><td>0912345678</td><td>17/11/2026 09:14</td><td>6</td><td>27</td><td class="del">Xoá</td></tr>
+            <tr><td>Trần Văn Minh</td><td>minh.tv@outlook.com</td><td>0987654321</td><td>16/11/2026 21:03</td><td>0</td><td>—</td><td class="del">Xoá</td></tr>
+          </tbody>
+        </table></div>
+        <p class="muted" style="margin-top:var(--space-3)">‹ Trước · Trang 1 / 7 · Sau ›</p>
+      </div>
+      <p class="mock-cap">MH-11 · Danh sách người chơi</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="mh-04">
+  <div class="container">
+    <h2>MH-04 · Màn hình Đăng ký</h2>
+    <p>Hiện thay cho MH-01 khi trình duyệt chưa nhớ người chơi (CN-13). Là trạng thái hiển thị thứ tư trên cùng trang game, mỗi lúc vẫn chỉ một màn hình được hiện.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Thành phần</th><th>Nội dung / hành vi</th><th>Token gợi ý</th></tr></thead>
+      <tbody>
+        <tr><td>Tiêu đề</td><td>“Đăng ký để chơi” (<code>h1</code>), dòng phụ “Nhập thông tin một lần, lần sau vào chơi ngay.”</td><td><code>--text-h1-size</code>, <code>--text-lead-size</code></td></tr>
+        <tr><td>Ô Họ tên</td><td><code>&lt;input type="text" autocomplete="name"&gt;</code>, có <code>&lt;label&gt;</code> thật. Tự nhận focus khi màn hình hiện.</td><td><code>--text-body-size</code></td></tr>
+        <tr><td>Ô Email</td><td><code>&lt;input type="email" autocomplete="email" inputmode="email"&gt;</code>.</td><td>—</td></tr>
+        <tr><td>Ô Số điện thoại</td><td><code>&lt;input type="tel" autocomplete="tel" inputmode="tel"&gt;</code>. Cho phép gõ dấu cách, dấu chấm, gạch nối; máy chủ tự chuẩn hoá (QT-63).</td><td>—</td></tr>
+        <tr><td>Ô đồng ý <span class="tag new">QĐ-10</span></td><td>Checkbox không tick sẵn: “Tôi đồng ý cho lưu họ tên, email, số điện thoại để quản lý người chơi.” Liên kết “Chi tiết” mở đoạn giải thích ngay bên dưới: lưu gì, để làm gì, ai xem được, cách yêu cầu xoá.</td><td><code>--text-caption-size</code></td></tr>
+        <tr><td>Nút “Đăng ký &amp; chơi”</td><td><code>&lt;button type="submit"&gt;</code>. Bấm hoặc Enter trong bất kỳ ô nào để gửi. Trong lúc gửi: nút bị vô hiệu và đổi chữ thành “Đang gửi…”, chống gửi hai lần.</td><td><code>--color-accent</code>, <code>--button-lg-*</code></td></tr>
+        <tr><td>Thông báo lỗi từng ô</td><td>Hiện dưới ô, màu <code>--color-danger</code>, nối với ô qua <code>aria-describedby</code>; ô lỗi có <code>aria-invalid="true"</code> và viền đỏ. Kiểm tra khi rời ô (blur) và khi gửi; khi gửi mà có lỗi thì focus vào ô lỗi đầu tiên.</td><td><code>--color-danger</code></td></tr>
+        <tr><td>Thông báo lỗi chung</td><td>Mất mạng / máy chủ lỗi: “Không kết nối được máy chủ. Vui lòng thử lại.” trong vùng <code>role="alert"</code>, phía trên nút. Dữ liệu đã nhập được giữ nguyên.</td><td><code>--color-danger</code></td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Tình huống</th><th>Câu thông báo</th></tr></thead>
+      <tbody>
+        <tr><td>Họ tên trống</td><td>Vui lòng nhập họ tên.</td></tr>
+        <tr><td>Họ tên quá ngắn / dài / có ký tự lạ</td><td>Họ tên từ 2 đến 80 ký tự, chỉ gồm chữ, dấu cách và dấu ’ - .</td></tr>
+        <tr><td>Email trống</td><td>Vui lòng nhập email.</td></tr>
+        <tr><td>Email sai định dạng</td><td>Email chưa đúng, ví dụ: ten@gmail.com</td></tr>
+        <tr><td>Số điện thoại trống</td><td>Vui lòng nhập số điện thoại.</td></tr>
+        <tr><td>Số điện thoại sai</td><td>Số điện thoại di động Việt Nam gồm 10 số, ví dụ: 0912 345 678</td></tr>
+        <tr><td>Chưa tick đồng ý</td><td>Bạn cần đồng ý để tiếp tục.</td></tr>
+        <tr><td>Gửi quá nhiều lần (QT-70)</td><td>Bạn thao tác quá nhanh, vui lòng thử lại sau ít phút.</td></tr>
+      </tbody>
+    </table></div>
+    <h3>Bổ sung cho MH-01 và MH-03</h3>
+    <ul>
+      <li><strong>MH-01:</strong> thêm dòng “Xin chào, &lt;tên gọi&gt;” phía trên luật ngắn; tên gọi là từ cuối của họ tên (“Nguyễn Thị Lan” → “Lan”). Bên cạnh là liên kết “Không phải bạn?” (CN-15), là <code>&lt;button&gt;</code> trông như liên kết. Nút “Bắt đầu” vẫn là nút nhận focus đầu tiên.</li>
+      <li><strong>MH-03:</strong> nếu lưu kết quả thất bại (CN-16), thêm dòng nhỏ màu <code>--color-text-tertiary</code>: “Chưa lưu được kết quả lượt này.” Không có nút thử lại, không làm chậm nút “Chơi lại”.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section alt" id="mh-10">
+  <div class="container">
+    <h2>MH-10 · Đăng nhập admin</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Thành phần</th><th>Nội dung / hành vi</th></tr></thead>
+      <tbody>
+        <tr><td>Địa chỉ</td><td><code>/admin/login</code>. Vào <code>/admin</code> khi chưa đăng nhập thì chuyển về đây.</td></tr>
+        <tr><td>Ô Tên đăng nhập</td><td><code>autocomplete="username"</code>, tự nhận focus.</td></tr>
+        <tr><td>Ô Mật khẩu</td><td><code>type="password" autocomplete="current-password"</code>.</td></tr>
+        <tr><td>Nút “Đăng nhập”</td><td>Vô hiệu trong lúc gửi. Thành công thì chuyển sang <code>/admin</code>.</td></tr>
+        <tr><td>Lỗi</td><td>Sai tên hoặc mật khẩu: một câu chung “Sai tên đăng nhập hoặc mật khẩu.” (không nói rõ sai cái nào). Bị khoá (QT-81): “Đăng nhập sai quá nhiều lần. Thử lại sau 15 phút.” Chưa cấu hình tài khoản: “Trang quản trị chưa được bật.” Ô mật khẩu được xoá trắng sau mỗi lần sai.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section" id="mh-11">
+  <div class="container">
+    <h2>MH-11 · Danh sách người chơi</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Thành phần</th><th>Nội dung / hành vi</th></tr></thead>
+      <tbody>
+        <tr><td>Thanh trên</td><td>Tiêu đề “Người chơi (N)” với N là tổng số khớp bộ lọc; nút “Đăng xuất” bên phải (CN-22).</td></tr>
+        <tr><td>Ô tìm kiếm</td><td><code>&lt;input type="search"&gt;</code>, nhãn ẩn “Tìm người chơi”. Tự tìm sau khi ngừng gõ 300ms, hoặc nhấn Enter; luôn quay về trang 1. Từ khoá được giữ trên địa chỉ trang (<code>/admin?q=lan&amp;page=2</code>) để tải lại không mất. Không khớp ai: “Không tìm thấy người chơi nào khớp ‘…’.”</td></tr>
+        <tr><td>Nút “Xuất CSV”</td><td>Tải file theo bộ lọc hiện tại (CN-21, QT-85). Danh sách rỗng thì vẫn tải được file chỉ có dòng tiêu đề.</td></tr>
+        <tr><td>Bảng</td><td>Cột: Họ tên · Email · Điện thoại · Ngày đăng ký · Số lượt · Điểm cao nhất · Lần chơi cuối · (Xoá). Giờ hiển thị theo giờ Việt Nam, dạng <code>dd/mm/yyyy HH:mm</code>. Chưa chơi lượt nào thì “Điểm cao nhất” và “Lần chơi cuối” hiện “—”. Trên màn hẹp, bảng cuộn ngang trong khung <code>.table-wrap</code>, trang không cuộn ngang.</td></tr>
+        <tr><td>Phân trang</td><td>20 dòng mỗi trang, “‹ Trước · Trang X / Y · Sau ›”. Nút đầu/cuối bị vô hiệu khi ở trang đầu/cuối.</td></tr>
+        <tr><td>Trạng thái trống</td><td>Chưa có người chơi nào: “Chưa có người chơi nào đăng ký.”</td></tr>
+        <tr><td>Hết phiên</td><td>Bất kỳ thao tác nào nhận 401 thì chuyển về MH-10 với thông báo “Phiên đăng nhập đã hết hạn.”</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section class="section alt" id="mh-12">
+  <div class="container">
+    <h2>MH-12 · Hộp xác nhận xoá</h2>
+    <ul>
+      <li>Dùng thẻ <code>&lt;dialog&gt;</code> dạng modal. Nội dung: “Xoá người chơi <strong>Nguyễn Thị Lan</strong> (lan@gmail.com)? Toàn bộ 6 lượt chơi của người này cũng bị xoá. Không thể hoàn tác.”</li>
+      <li>Hai nút: “Huỷ” (mặc định nhận focus) và “Xoá” (màu <code>--color-danger</code>). Esc hoặc bấm ra ngoài = Huỷ.</li>
+      <li>Xoá thành công: đóng hộp, dòng biến mất, tổng số giảm 1, hiện thông báo ngắn “Đã xoá Nguyễn Thị Lan.” trong vùng <code>aria-live</code>. Nếu trang hiện tại trống sau khi xoá thì lùi về trang trước.</li>
+      <li>Xoá thất bại: hộp vẫn mở, hiện “Không xoá được, vui lòng thử lại.”</li>
+    </ul>
+    <div class="note warn"><p><strong>Trang admin:</strong> thêm <code>&lt;meta name="robots" content="noindex"&gt;</code>; không có liên kết nào từ trang game sang <code>/admin</code>.</p></div>
+  </div>
+</section>
+
 <div class="container pager">
   <a href="02-chuc-nang.html">‹ Chức năng</a>
   <a href="04-quy-tac-du-lieu.html">Quy tắc &amp; dữ liệu ›</a>
 </div>
-<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 13/11/2026</div></footer>
+<footer class="footer"><div class="container">Đập Chuột · Tài liệu thiết kế · Cập nhật 17/11/2026</div></footer>
 </body>
 </html>
