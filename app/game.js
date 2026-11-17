@@ -143,6 +143,68 @@
   function formatNumber(n) { return n.toLocaleString('vi-VN'); }
 
   /* ---------------------------------------------------------------------
+     Âm thanh — tổng hợp bằng Web Audio, không cần file âm thanh.
+     AudioContext được tạo/mở khóa trong cú bấm “Bắt đầu” / “Chơi lại”
+     (trình duyệt, nhất là iOS, chỉ cho phát âm thanh sau thao tác người dùng).
+     --------------------------------------------------------------------- */
+  let audioCtx = null;
+  let noiseBuffer = null;
+
+  function unlockAudio() {
+    try {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        audioCtx = new Ctx();
+        noiseBuffer = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.08), audioCtx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) {
+      audioCtx = null;   // không có âm thanh thì game vẫn chạy bình thường
+    }
+  }
+
+  // Tiếng “bốp”: tiếng gõ ngắn (nhiễu lọc) + tiếng “boing” trượt xuống
+  function playHitSound() {
+    if (!audioCtx || audioCtx.state !== 'running') return;
+    try {
+      const t = audioCtx.currentTime;
+      const out = audioCtx.createGain();
+      out.gain.value = 0.6;
+      out.connect(audioCtx.destination);
+
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = noiseBuffer;
+      const band = audioCtx.createBiquadFilter();
+      band.type = 'bandpass';
+      band.frequency.value = 1600;
+      band.Q.value = 0.8;
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0.9, t);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+      noise.connect(band).connect(noiseGain).connect(out);
+      noise.start(t);
+      noise.stop(t + 0.08);
+
+      const osc = audioCtx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(620, t);
+      osc.frequency.exponentialRampToValueAtTime(120, t + 0.18);
+      const oscGain = audioCtx.createGain();
+      oscGain.gain.setValueAtTime(0.0001, t);
+      oscGain.gain.exponentialRampToValueAtTime(0.8, t + 0.005);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+      osc.connect(oscGain).connect(out);
+      osc.start(t);
+      osc.stop(t + 0.24);
+    } catch (e) {
+      /* bỏ qua lỗi âm thanh */
+    }
+  }
+
+  /* ---------------------------------------------------------------------
      Kỷ lục (QT-40…QT-43)
      --------------------------------------------------------------------- */
   function readHighScore() {
@@ -241,6 +303,7 @@
      Vòng đời lượt chơi
      --------------------------------------------------------------------- */
   function startRound() {
+    unlockAudio();
     if (state.phase === PHASE.PLAYING) return;                              // QT-11
     if (state.phase === PHASE.END && now() < replayLockedUntil) return;     // QT-53
 
@@ -367,6 +430,7 @@
     m.state = MOLE.HIT;                                                    // QT-21
     state.score += CONFIG.POINTS_PER_HIT;
     renderScore();
+    playHitSound();
 
     const cell = cells[hole];
     cell.node.classList.add('is-hit');
