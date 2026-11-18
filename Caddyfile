@@ -1,0 +1,14 @@
+# Caddy trên máy chủ: tự xin chứng chỉ HTTPS (Let's Encrypt) và chuyển tiếp vào app.
+game.cuonguk.com {
+	encode gzip
+	reverse_proxy app:3000
+}
+
+# Truy cập bằng địa chỉ IP qua HTTP chỉ để thử khi DNS chưa trỏ xong.
+# Không cho vào trang quản trị qua HTTP thường: mật khẩu sẽ đi không mã hoá.
+:80 {
+	encode gzip
+	@admin path /admin /admin/* /api/admin /api/admin/*
+	respond @admin "Trang quan tri chi mo qua https://game.cuonguk.com/admin" 403
+	reverse_proxy app:3000
+}

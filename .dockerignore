@@ -27,3 +27,7 @@ npm-debug.log*
 # File Docker
 Dockerfile
 compose.yaml
+
+# Chỉ dùng trên máy chủ
+compose.prod.yaml
+Caddyfile

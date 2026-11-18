@@ -1,0 +1,52 @@
+# Ghi đè cho máy chủ (docs/06-ke-hoach-deploy.html). Máy Mac không dùng file này.
+# Chạy: docker compose -f compose.yaml -f compose.prod.yaml up -d --build
+services:
+  app:
+    ports: !override
+      - "127.0.0.1:3000:3000"      # chỉ trong máy, người ngoài đi qua caddy
+    environment:
+      TRUST_PROXY: "1"             # đọc IP thật của người chơi từ caddy
+      NODE_OPTIONS: --max-old-space-size=128
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+
+  db:
+    command:
+      - postgres
+      - -c
+      - shared_buffers=64MB
+      - -c
+      - work_mem=2MB
+      - -c
+      - maintenance_work_mem=32MB
+      - -c
+      - max_connections=20
+      - -c
+      - effective_cache_size=192MB
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 96M
+
+volumes:
+  caddy_data:
+  caddy_config:
